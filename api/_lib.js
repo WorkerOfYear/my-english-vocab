@@ -6,9 +6,15 @@ const KEY_OWNER = "vocab:tg_owner"; // chat id of the learner (private chat id =
 const KEY_LINK = "vocab:tg_link"; // one-time code for t.me/<bot>?start=<code>
 
 // ---------- storage: Upstash Redis REST API (Vercel Marketplace → Upstash for Redis)
+// Vercel may add a custom prefix to the variable names (e.g. STORAGE_KV_REST_API_URL), so match by suffix.
+const envBySuffix = (re) => {
+  const name = Object.keys(process.env).find((k) => re.test(k) && !/READ_ONLY/.test(k) && process.env[k]);
+  return name ? process.env[name] : undefined;
+};
+
 function redisConfig() {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || envBySuffix(/(KV_REST_API|REDIS_REST)_URL$/);
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || envBySuffix(/(KV_REST_API|REDIS_REST)_TOKEN$/);
   if (!url || !token) throw httpError(500, "Хранилище не подключено: добавь Upstash for Redis в Vercel → Storage");
   return { url, token };
 }
