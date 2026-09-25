@@ -155,6 +155,8 @@
       if (Array.isArray(data.custom)) App.saveCustom(data.custom);
     },
     reset() { state = defaults(); save(); },
+    // Re-read after another device's progress was pulled into storage (js/sync.js).
+    reload() { state = Object.assign(defaults(), App.store.get("srs", {})); refreshGroups(); },
   };
 
   refreshGroups();

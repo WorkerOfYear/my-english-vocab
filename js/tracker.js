@@ -97,9 +97,11 @@
 
           <div class="legend">${STEP_LABELS.map((l, s) => `<span class="pill s${s}">${l}</span>`).join("")}</div>
 
+          ${syncCard()}
+
           <div class="card">
             <h3>Прогресс</h3>
-            <p class="muted small">Прогресс хранится в этом браузере. Сохраняй резервную копию, чтобы перенести его на другой компьютер.</p>
+            <p class="muted small">${App.sync.connected ? "Прогресс синхронизируется между устройствами. Резервная копия на всякий случай:" : "Прогресс хранится в этом браузере. Сохраняй резервную копию, чтобы перенести его на другой компьютер."}</p>
             <div class="row">
               <button class="btn" id="export">💾 Сохранить в файл</button>
               <label class="btn">📂 Загрузить из файла<input type="file" id="import" accept=".json" hidden></label>
@@ -134,6 +136,64 @@
         root.querySelector("#reset").onclick = () => {
           if (confirm("Точно удалить все группы и прогресс повторений?")) { srs.reset(); draw(); }
         };
+        bindSync();
+      }
+
+      function syncCard() {
+        const sync = App.sync;
+        if (!sync.online) {
+          return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
+            <p class="muted small">${esc(sync.status())} Открой сайт на Vercel, чтобы подключить напоминания.</p></div>`;
+        }
+        if (!sync.connected) {
+          return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
+            <p class="muted small">Прогресс будет одинаковым на телефоне и компьютере, а бот в Telegram будет присылать
+            вечером ссылку на повторение. Введи ключ — это значение <code>SYNC_KEY</code> из настроек проекта в Vercel.</p>
+            <form class="row" id="sync-form">
+              <input class="field" id="sync-key" type="password" placeholder="Ключ синхронизации" autocomplete="off" style="flex:1;min-width:180px">
+              <button class="btn primary">Подключить</button>
+            </form>
+            <p class="small" id="sync-status"></p></div>`;
+        }
+        return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
+          <p class="small" id="sync-status">${esc(sync.status())}</p>
+          <div class="row">
+            <button class="btn" id="sync-test">📨 Проверить Telegram</button>
+            <button class="btn" id="sync-link">📱 Подключить телефон</button>
+            <button class="btn danger" id="sync-off">Отключить</button>
+          </div>
+          <p class="small" id="sync-msg"></p></div>`;
+      }
+
+      function bindSync() {
+        const form = root.querySelector("#sync-form");
+        if (form) form.onsubmit = async (e) => {
+          e.preventDefault();
+          const key = root.querySelector("#sync-key").value.trim();
+          if (!key) return;
+          root.querySelector("#sync-status").textContent = "⏳ Подключаюсь…";
+          try { await App.sync.connect(key); draw(); }
+          catch (err) { root.querySelector("#sync-status").textContent = "⚠️ " + err.message; }
+        };
+        const msg = (t) => { const el = root.querySelector("#sync-msg"); if (el) el.textContent = t; };
+        const test = root.querySelector("#sync-test");
+        if (test) test.onclick = async () => {
+          msg("⏳ Отправляю…");
+          try {
+            const r = await App.sync.test();
+            msg(r.sent ? "✅ Сообщение отправлено — проверь Telegram" : "Отправлено");
+          } catch (err) { msg("⚠️ " + err.message); }
+        };
+        const link = root.querySelector("#sync-link");
+        if (link) link.onclick = async () => {
+          const url = App.sync.deviceLink();
+          try { await navigator.clipboard.writeText(url); msg("🔗 Ссылка скопирована. Открой её на телефоне — он подключится сам. Никому её не отправляй."); }
+          catch (e) { prompt("Открой эту ссылку на телефоне:", url); }
+        };
+        const off = root.querySelector("#sync-off");
+        if (off) off.onclick = () => {
+          if (confirm("Отключить синхронизацию на этом устройстве? Прогресс останется в браузере.")) { App.sync.disconnect(); draw(); }
+        };
       }
 
       function nextReviewText() {
@@ -144,6 +204,12 @@
       }
 
       draw();
+      const onSync = () => {
+        const el = root.querySelector("#sync-status");
+        if (el && App.sync.connected) el.textContent = App.sync.status();
+      };
+      document.addEventListener("sync-status", onSync);
+      return () => document.removeEventListener("sync-status", onSync);
     },
   };
 
