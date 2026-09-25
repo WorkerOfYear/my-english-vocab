@@ -1,0 +1,3055 @@
+{
+ "vegetable": {
+  "ru": "овощ"
+ },
+ "breakfast": {
+  "ru": "завтрак"
+ },
+ "cucumber": {
+  "ru": "огурец"
+ },
+ "feel like": {
+  "ru": "хотеть, быть в настроении"
+ },
+ "onion": {
+  "ru": "лук"
+ },
+ "feel down/blue": {
+  "ru": "грустить, хандрить"
+ },
+ "fall": {
+  "ru": "осень"
+ },
+ "essay topics+ useful vocab": {
+  "skip": true
+ },
+ "coworkers": {
+  "ru": "коллеги"
+ },
+ "colleague": {
+  "ru": "коллега"
+ },
+ "I’m gonna": {
+  "ru": "я собираюсь"
+ },
+ "another//other": {
+  "skip": true
+ },
+ "listen TO": {
+  "ru": "слушать (кого-то/что-то)"
+ },
+ "look AT": {
+  "ru": "смотреть на"
+ },
+ "good AT": {
+  "ru": "хорош в чём-то"
+ },
+ "depend ON": {
+  "ru": "зависеть от"
+ },
+ "haven’t got a clue": {
+  "ru": "понятия не имею"
+ },
+ "egypt": {
+  "ru": "Египет"
+ },
+ "turkey": {
+  "ru": "Турция; индейка"
+ },
+ "sick (slang)": {
+  "ru": "крутой, классный (сленг)"
+ },
+ "migration": {
+  "ru": "миграция"
+ },
+ "month": {
+  "ru": "месяц"
+ },
+ "said": {
+  "ru": "сказал (прош. от say)"
+ },
+ "awful": {
+  "ru": "ужасный"
+ },
+ "go out with someone": {
+  "ru": "встречаться с кем-то"
+ },
+ "see/ /watch": {
+  "skip": true
+ },
+ "jam-packed": {
+  "ru": "битком набитый"
+ },
+ "dead-end job": {
+  "ru": "бесперспективная работа"
+ },
+ "dramatic change": {
+  "ru": "резкая перемена"
+ },
+ "orchestra": {
+  "ru": "оркестр"
+ },
+ "traffic congestion": {
+  "ru": "пробка, затор на дороге"
+ },
+ "crimea": {
+  "ru": "Крым"
+ },
+ "on youtube": {
+  "ru": "на ютубе"
+ },
+ "weekend": {
+  "ru": "выходные (суббота и воскресенье)"
+ },
+ "weekends": {
+  "ru": "по выходным, выходные"
+ },
+ "AI": {
+  "ru": "ИИ, искусственный интеллект"
+ },
+ "little": {
+  "skip": true
+ },
+ "strong anxiety": {
+  "ru": "сильная тревога"
+ },
+ "eco-friendly": {
+  "ru": "экологичный"
+ },
+ "catch one’s attention/ catch one’s eye": {
+  "ru": "привлечь чьё-то внимание"
+ },
+ "psychologist": {
+  "ru": "психолог"
+ },
+ "I AM afraid": {
+  "ru": "я боюсь; боюсь, что…"
+ },
+ "remarkable": {
+  "ru": "выдающийся, замечательный"
+ },
+ "timely": {
+  "ru": "своевременный"
+ },
+ "enhence": {
+  "ru": "улучшать, усиливать",
+  "en": "enhance"
+ },
+ "ready-made products": {
+  "ru": "готовые продукты"
+ },
+ "A few// few (+countable n)": {
+  "skip": true
+ },
+ "A little// little (+uncountable n)": {
+  "skip": true
+ },
+ "do/complete ex-s": {
+  "skip": true
+ },
+ "photographer": {
+  "ru": "фотограф"
+ },
+ "studio": {
+  "ru": "студия"
+ },
+ "uncomfortable": {
+  "ru": "неудобный, некомфортный"
+ },
+ "pose": {
+  "ru": "позировать; поза"
+ },
+ "diet": {
+  "ru": "рацион, диета"
+ },
+ "jubilee": {
+  "ru": "юбилей"
+ },
+ "isle": {
+  "ru": "остров"
+ },
+ "say//tell": {
+  "skip": true
+ },
+ "street dogs": {
+  "ru": "бездомные собаки"
+ },
+ "highlight": {
+  "ru": "выделять, подчёркивать; яркий момент"
+ },
+ "may have": {
+  "skip": true
+ },
+ "has changed": {
+  "skip": true
+ },
+ "if I were, we wouldn’t have": {
+  "skip": true
+ },
+ "first and foremost": {
+  "ru": "прежде всего"
+ },
+ "give up": {
+  "ru": "бросить, сдаться"
+ },
+ "quit": {
+  "ru": "бросить, уволиться"
+ },
+ "put on// take off": {
+  "ru": "надевать / снимать"
+ },
+ "run out of": {
+  "ru": "закончиться (о запасах)"
+ },
+ "had been visiting": {
+  "skip": true
+ },
+ "not my cup of tea": {
+  "ru": "не моё, не в моём вкусе"
+ },
+ "january": {
+  "ru": "январь"
+ },
+ "walk": {
+  "ru": "ходить пешком, гулять"
+ },
+ "seesaw": {
+  "ru": "качели-балансир"
+ },
+ "speak of the devil": {
+  "ru": "лёгок на помине"
+ },
+ "draw one’s attention/ catch one’s attention": {
+  "ru": "обратить чьё-то внимание"
+ },
+ "like/as": {
+  "skip": true
+ },
+ "running out": {
+  "ru": "заканчивается"
+ },
+ "indicate my progress": {
+  "ru": "показать мой прогресс"
+ },
+ "eventually": {
+  "ru": "в итоге, в конце концов"
+ },
+ "scholar": {
+  "ru": "учёный, исследователь"
+ },
+ "patience": {
+  "ru": "терпение"
+ },
+ "lightbulb": {
+  "ru": "лампочка"
+ },
+ "drop out": {
+  "ru": "бросить учёбу"
+ },
+ "box office": {
+  "ru": "касса; кассовые сборы"
+ },
+ "to persuade": {
+  "ru": "убеждать"
+ },
+ "nasty": {
+  "ru": "противный, мерзкий"
+ },
+ "handwritten": {
+  "ru": "рукописный"
+ },
+ "amused": {
+  "ru": "удивлённый и весёлый, позабавленный"
+ },
+ "arrive": {
+  "ru": "прибывать"
+ },
+ "chit chat": {
+  "ru": "болтовня, светская беседа"
+ },
+ "say something to someone": {
+  "ru": "сказать что-то кому-то"
+ },
+ "tell someone something": {
+  "ru": "рассказать кому-то что-то"
+ },
+ "hockey": {
+  "ru": "хоккей"
+ },
+ "small": {
+  "ru": "маленький"
+ },
+ "correctly": {
+  "ru": "правильно"
+ },
+ "typo": {
+  "ru": "опечатка"
+ },
+ "exam": {
+  "ru": "экзамен"
+ },
+ "cheat sheet": {
+  "ru": "шпаргалка"
+ },
+ "to communicate the idea": {
+  "ru": "донести мысль"
+ },
+ "dive into": {
+  "ru": "погрузиться в"
+ },
+ "exemplify": {
+  "ru": "служить примером, иллюстрировать"
+ },
+ "annually": {
+  "ru": "ежегодно"
+ },
+ "resorted": {
+  "ru": "прибегнул (к чему-то)"
+ },
+ "discretely": {
+  "ru": "по отдельности, дискретно"
+ },
+ "accuse": {
+  "ru": "обвинять"
+ },
+ "questioning": {
+  "ru": "допрос; сомнение"
+ },
+ "admitted to": {
+  "ru": "признался в; поступил в"
+ },
+ "batting team": {
+  "ru": "отбивающая команда (крикет)"
+ },
+ "bowling and fielding team": {
+  "ru": "подающая и полевая команда (крикет)"
+ },
+ "fencing": {
+  "ru": "фехтование"
+ },
+ "martial art": {
+  "ru": "боевое искусство"
+ },
+ "grappling techniques": {
+  "ru": "техники борьбы"
+ },
+ "pin or master the opponent": {
+  "ru": "прижать или одолеть соперника"
+ },
+ "striking techniques": {
+  "ru": "ударные техники"
+ },
+ "interrogation": {
+  "ru": "допрос"
+ },
+ "shoplifting": {
+  "ru": "магазинная кража"
+ },
+ "burglary": {
+  "ru": "кража со взломом"
+ },
+ "robbery": {
+  "ru": "ограбление"
+ },
+ "money laundering": {
+  "ru": "отмывание денег"
+ },
+ "arson": {
+  "ru": "поджог"
+ },
+ "kidnapping": {
+  "ru": "похищение людей"
+ },
+ "smuggling": {
+  "ru": "контрабанда"
+ },
+ "manslaughter": {
+  "ru": "непредумышленное убийство"
+ },
+ "on THE Internet": {
+  "ru": "в интернете"
+ },
+ "accostomed": {
+  "ru": "привыкший",
+  "en": "accustomed"
+ },
+ "arrive in/ at": {
+  "ru": "прибыть в (город/страну) / в (место)"
+ },
+ "bless you": {
+  "ru": "будь здоров"
+ },
+ "such//so": {
+  "skip": true
+ },
+ "prove": {
+  "ru": "доказывать"
+ },
+ "illustrate something with examples": {
+  "ru": "проиллюстрировать что-то примерами"
+ },
+ "irritable": {
+  "ru": "раздражительный"
+ },
+ "get irritated": {
+  "ru": "раздражаться"
+ },
+ "suitable": {
+  "ru": "подходящий"
+ },
+ "in no time": {
+  "ru": "в мгновение ока, очень быстро"
+ },
+ "commute": {
+  "ru": "ездить на работу и обратно; дорога на работу"
+ },
+ "wind down // Unwind": {
+  "ru": "расслабиться, отдохнуть"
+ },
+ "georgian": {
+  "ru": "грузинский; грузин"
+ },
+ "jordan": {
+  "ru": "Иордания"
+ },
+ "addicted": {
+  "ru": "зависимый"
+ },
+ "squid game": {
+  "ru": "Игра в кальмара"
+ },
+ "nothing can excuse such neglect": {
+  "ru": "ничто не оправдывает такую халатность"
+ },
+ "apparently": {
+  "ru": "по-видимому, судя по всему"
+ },
+ "seamlessly": {
+  "ru": "плавно, без сбоев"
+ },
+ "settings": {
+  "ru": "место и время действия; настройки"
+ },
+ "set in": {
+  "ru": "происходить (о действии фильма/книги)"
+ },
+ "happy belated birthday": {
+  "ru": "с прошедшим днём рождения"
+ },
+ "high brow": {
+  "ru": "интеллектуальный, для элиты"
+ },
+ "low brow": {
+  "ru": "примитивный, массовый"
+ },
+ "basic": {
+  "ru": "базовый, простой"
+ },
+ "tedious": {
+  "ru": "нудный, утомительный"
+ },
+ "thought provoking": {
+  "ru": "заставляющий задуматься"
+ },
+ "haunting": {
+  "ru": "завораживающий, не отпускающий"
+ },
+ "enlightening": {
+  "ru": "поучительный, познавательный"
+ },
+ "educational": {
+  "ru": "образовательный"
+ },
+ "in the picture": {
+  "ru": "на картинке"
+ },
+ "during": {
+  "ru": "во время"
+ },
+ "treat someone in a certain way": {
+  "ru": "относиться к кому-то определённым образом"
+ },
+ "care": {
+  "ru": "забота; заботиться"
+ },
+ "according to": {
+  "ru": "согласно, по словам"
+ },
+ "vision": {
+  "ru": "видение; зрение"
+ },
+ "medieval": {
+  "ru": "средневековый"
+ },
+ "middle Ages": {
+  "ru": "Средние века"
+ },
+ "task level concurrecy": {
+  "ru": "параллелизм на уровне задач",
+  "en": "task level concurrency"
+ },
+ "touching, moving": {
+  "ru": "трогательный"
+ },
+ "tearjerker": {
+  "ru": "слезовыжималка (фильм, книга)"
+ },
+ "go blank": {
+  "ru": "растеряться, всё вылетело из головы"
+ },
+ "heartwarming": {
+  "ru": "трогательный, согревающий душу"
+ },
+ "composer": {
+  "ru": "композитор"
+ },
+ "A stunt man": {
+  "ru": "каскадёр"
+ },
+ "make up artist": {
+  "ru": "визажист, гримёр"
+ },
+ "A set designer": {
+  "ru": "художник-постановщик"
+ },
+ "smooth Operator": {
+  "ru": "ловкач, обаятельный делец"
+ },
+ "reject": {
+  "ru": "отклонять, отвергать"
+ },
+ "learn by heart": {
+  "ru": "выучить наизусть"
+ },
+ "can’t but": {
+  "ru": "не могу не…"
+ },
+ "on the edge of my seat": {
+  "ru": "в напряжении, затаив дыхание"
+ },
+ "box office hit": {
+  "ru": "кассовый хит"
+ },
+ "binge-watching": {
+  "ru": "запойный просмотр сериалов"
+ },
+ "cause a stir": {
+  "ru": "вызвать ажиотаж"
+ },
+ "typecast": {
+  "ru": "давать однотипные роли (актёру)"
+ },
+ "miscast": {
+  "ru": "неудачно подобрать на роль"
+ },
+ "halo effect (halo error)": {
+  "ru": "эффект ореола"
+ },
+ "mugshots": {
+  "ru": "полицейское фото арестованного"
+ },
+ "critique": {
+  "ru": "критический разбор, рецензия"
+ },
+ "military": {
+  "ru": "военный"
+ },
+ "march": {
+  "ru": "маршировать; марш"
+ },
+ "care for": {
+  "ru": "ухаживать за, заботиться о"
+ },
+ "out laud": {
+  "ru": "вслух",
+  "en": "out loud"
+ },
+ "einstein": {
+  "ru": "Эйнштейн"
+ },
+ "oxygen": {
+  "ru": "кислород"
+ },
+ "hydrogen": {
+  "ru": "водород"
+ },
+ "multiplied by": {
+  "ru": "умноженный на"
+ },
+ "carbohydrates": {
+  "ru": "углеводы"
+ },
+ "soil": {
+  "ru": "почва"
+ },
+ "coal": {
+  "ru": "уголь"
+ },
+ "academic weapon mode": {
+  "ru": "режим «машина учёбы»"
+ },
+ "sail a boat": {
+  "ru": "ходить на парусной лодке"
+ },
+ "school": {
+  "ru": "школа"
+ },
+ "university": {
+  "ru": "университет"
+ },
+ "uniform": {
+  "ru": "форма, униформа"
+ },
+ "exams system": {
+  "ru": "система экзаменов"
+ },
+ "entrance": {
+  "ru": "вход; поступление"
+ },
+ "I can relate": {
+  "ru": "мне это знакомо, понимаю"
+ },
+ "relatable": {
+  "ru": "близкий, понятный (с чем можно себя соотнести)"
+ },
+ "sight": {
+  "ru": "достопримечательность; зрение"
+ },
+ "amusement park": {
+  "ru": "парк развлечений"
+ },
+ "muse": {
+  "ru": "размышлять; муза"
+ },
+ "naughts and crosses": {
+  "ru": "крестики-нолики"
+ },
+ "mussels": {
+  "ru": "мидии"
+ },
+ "tolerate": {
+  "ru": "терпеть, выносить"
+ },
+ "tuition fee": {
+  "ru": "плата за обучение"
+ },
+ "apprentice": {
+  "ru": "ученик, подмастерье"
+ },
+ "praise": {
+  "ru": "хвалить; похвала"
+ },
+ "pilot an aeroplane": {
+  "ru": "управлять самолётом"
+ },
+ "cram": {
+  "ru": "зубрить"
+ },
+ "notes": {
+  "ru": "заметки, конспект"
+ },
+ "divided between": {
+  "ru": "разделённый между"
+ },
+ "obligatory": {
+  "ru": "обязательный"
+ },
+ "booth": {
+  "ru": "будка, кабинка"
+ },
+ "two sides of one coin": {
+  "ru": "две стороны одной медали"
+ },
+ "drive someone crazy": {
+  "ru": "сводить кого-то с ума"
+ },
+ "kettle": {
+  "ru": "чайник"
+ },
+ "who": {
+  "skip": true
+ },
+ "chandelier": {
+  "ru": "люстра"
+ },
+ "terrific": {
+  "ru": "потрясающий; огромный"
+ },
+ "blurred": {
+  "ru": "размытый"
+ },
+ "modest": {
+  "ru": "скромный"
+ },
+ "ads": {
+  "ru": "реклама, объявления"
+ },
+ "feature": {
+  "ru": "особенность, черта"
+ },
+ "bold": {
+  "ru": "лысый",
+  "en": "bald"
+ },
+ "negotiating": {
+  "ru": "ведение переговоров"
+ },
+ "wishy-washy": {
+  "ru": "нерешительный, размытый"
+ },
+ "bounce and round": {
+  "skip": true
+ },
+ "tied down": {
+  "ru": "связанный по рукам и ногам"
+ },
+ "settle": {
+  "ru": "уладить; обосноваться"
+ },
+ "things went south": {
+  "ru": "всё пошло не так"
+ },
+ "sale": {
+  "ru": "продажа; распродажа"
+ },
+ "taugh times": {
+  "ru": "тяжёлые времена",
+  "en": "tough times"
+ },
+ "location": {
+  "ru": "местоположение"
+ },
+ "design": {
+  "ru": "дизайн; проектировать"
+ },
+ "describe each room in detail": {
+  "skip": true
+ },
+ "curious": {
+  "ru": "любопытный"
+ },
+ "cautious": {
+  "ru": "осторожный"
+ },
+ "full OF something": {
+  "ru": "полный чего-то"
+ },
+ "luxurious": {
+  "ru": "роскошный"
+ },
+ "amenities": {
+  "ru": "удобства"
+ },
+ "spacious": {
+  "ru": "просторный"
+ },
+ "homely": {
+  "ru": "уютный, домашний"
+ },
+ "gigantic": {
+  "ru": "гигантский"
+ },
+ "tremendous": {
+  "ru": "огромный, потрясающий"
+ },
+ "mansion": {
+  "ru": "особняк"
+ },
+ "employer": {
+  "ru": "работодатель"
+ },
+ "quote": {
+  "ru": "цитировать; цитата"
+ },
+ "gym": {
+  "ru": "спортзал"
+ },
+ "architects": {
+  "ru": "архитекторы"
+ },
+ "exquisite": {
+  "ru": "изысканный"
+ },
+ "occupation": {
+  "ru": "род занятий, профессия"
+ },
+ "pair": {
+  "ru": "пара (предметов)"
+ },
+ "couple": {
+  "ru": "пара (людей)"
+ },
+ "recharge": {
+  "ru": "перезарядиться, восстановить силы"
+ },
+ "city bustle": {
+  "ru": "городская суета"
+ },
+ "transparency": {
+  "ru": "прозрачность"
+ },
+ "sleek furniture": {
+  "ru": "стильная современная мебель"
+ },
+ "out of blue": {
+  "ru": "как гром среди ясного неба"
+ },
+ "roll up one’s sleeves": {
+  "ru": "засучить рукава"
+ },
+ "inner drive": {
+  "ru": "внутренняя мотивация"
+ },
+ "pulled together": {
+  "ru": "собранный; сплотились"
+ },
+ "think on one’s feet": {
+  "ru": "быстро соображать"
+ },
+ "beforehand": {
+  "ru": "заранее"
+ },
+ "be into something": {
+  "ru": "увлекаться чем-то"
+ },
+ "beg": {
+  "ru": "умолять, просить"
+ },
+ "on the same page": {
+  "ru": "на одной волне"
+ },
+ "team player": {
+  "ru": "командный игрок"
+ },
+ "entertainment": {
+  "ru": "развлечения"
+ },
+ "bare": {
+  "ru": "голый, неприкрытый; минимальный"
+ },
+ "barefoot": {
+  "ru": "босиком"
+ },
+ "bare infinitive": {
+  "ru": "инфинитив без to"
+ },
+ "groceries": {
+  "ru": "продукты"
+ },
+ "fancy doing smth": {
+  "ru": "хотеть что-то сделать (брит.)"
+ },
+ "fail to": {
+  "ru": "не суметь, не сделать"
+ },
+ "risk doing something": {
+  "ru": "рисковать, делая что-то"
+ },
+ "HR": {
+  "ru": "отдел кадров, HR"
+ },
+ "research": {
+  "ru": "исследование"
+ },
+ "duties": {
+  "ru": "обязанности"
+ },
+ "the volcano was fuming thick black smoke": {
+  "skip": true
+ },
+ "the customer demunded a refund": {
+  "skip": true
+ },
+ "they give me moldyed strawbarries": {
+  "skip": true
+ },
+ "medical Check up": {
+  "ru": "медосмотр"
+ },
+ "land a job": {
+  "ru": "получить работу"
+ },
+ "fix make up": {
+  "ru": "поправить макияж",
+  "en": "fix one's make up"
+ },
+ "screwdriver": {
+  "ru": "отвёртка"
+ },
+ "I like learning new things": {
+  "ru": "я люблю узнавать новое"
+ },
+ "prospects": {
+  "ru": "перспективы"
+ },
+ "exaggerate": {
+  "ru": "преувеличивать"
+ },
+ "cameraman": {
+  "ru": "оператор"
+ },
+ "hang out": {
+  "ru": "тусоваться, проводить время"
+ },
+ "phone case": {
+  "ru": "чехол для телефона"
+ },
+ "fraud": {
+  "ru": "мошенничество"
+ },
+ "cheat on someone": {
+  "ru": "изменять кому-то"
+ },
+ "reported speech": {
+  "ru": "косвенная речь"
+ },
+ "affirmative sentence": {
+  "ru": "утвердительное предложение"
+ },
+ "convincing": {
+  "ru": "убедительный"
+ },
+ "woo": {
+  "ru": "добиваться расположения, ухаживать"
+ },
+ "precise": {
+  "ru": "точный"
+ },
+ "direct order of words in a sentence": {
+  "ru": "прямой порядок слов в предложении"
+ },
+ "last": {
+  "ru": "прошлый, последний"
+ },
+ "get broken": {
+  "ru": "сломаться"
+ },
+ "to go to a masters degree": {
+  "ru": "поступить в магистратуру",
+  "en": "to go for a master's degree"
+ },
+ "success/ /successful": {
+  "skip": true
+ },
+ "bittersweet": {
+  "ru": "горько-сладкий, со смешанными чувствами"
+ },
+ "conversion": {
+  "ru": "конверсия (переход слова в другую часть речи)"
+ },
+ "dreadful": {
+  "ru": "ужасный"
+ },
+ "receipt": {
+  "ru": "чек, квитанция"
+ },
+ "probation": {
+  "ru": "испытательный срок; условный срок"
+ },
+ "aim to": {
+  "ru": "стремиться к"
+ },
+ "dry and boring": {
+  "ru": "сухо и скучно"
+ },
+ "do vocabulary ex. b)c)d) on p. 62": {
+  "skip": true
+ },
+ "zoo": {
+  "ru": "зоопарк"
+ },
+ "seller": {
+  "ru": "продавец"
+ },
+ "hairdresser": {
+  "ru": "парикмахер"
+ },
+ "headphones": {
+  "ru": "наушники"
+ },
+ "tablet": {
+  "ru": "планшет"
+ },
+ "tipsy": {
+  "ru": "навеселе, подвыпивший"
+ },
+ "overpriced": {
+  "ru": "завышенный в цене, переоценённый"
+ },
+ "quite expensive": {
+  "ru": "довольно дорогой"
+ },
+ "room": {
+  "ru": "место, пространство"
+ },
+ "i.e": {
+  "ru": "то есть"
+ },
+ "to bargin": {
+  "ru": "торговаться",
+  "en": "to bargain"
+ },
+ "karen": {
+  "ru": "«Карен», скандальная капризная тётка (сленг)"
+ },
+ "gesture": {
+  "ru": "жест"
+ },
+ "transparent": {
+  "ru": "прозрачный"
+ },
+ "invisible": {
+  "ru": "невидимый"
+ },
+ "something consists of something": {
+  "ru": "что-то состоит из чего-то"
+ },
+ "gambling": {
+  "ru": "азартные игры"
+ },
+ "half": {
+  "ru": "половина"
+ },
+ "A senior couple": {
+  "ru": "пожилая пара"
+ },
+ "damaged": {
+  "ru": "повреждённый"
+ },
+ "silicon Valley": {
+  "ru": "Кремниевая долина"
+ },
+ "soldier": {
+  "ru": "солдат"
+ },
+ "break up": {
+  "ru": "расстаться"
+ },
+ "broke": {
+  "ru": "без денег, на мели"
+ },
+ "major": {
+  "ru": "основная специальность (в вузе)"
+ },
+ "powder": {
+  "ru": "порошок"
+ },
+ "what’s their attitude": {
+  "ru": "как они к этому относятся"
+ },
+ "how they perceive": {
+  "ru": "как они воспринимают"
+ },
+ "memorable": {
+  "ru": "запоминающийся"
+ },
+ "to be scared": {
+  "ru": "бояться"
+ },
+ "height": {
+  "ru": "рост, высота"
+ },
+ "rude": {
+  "ru": "грубый"
+ },
+ "plumber": {
+  "ru": "сантехник"
+ },
+ "doubts": {
+  "ru": "сомнения"
+ },
+ "the Law of Universal Gravitation": {
+  "ru": "закон всемирного тяготения"
+ },
+ "flood": {
+  "ru": "наводнение"
+ },
+ "endure": {
+  "ru": "терпеть, выдерживать"
+ },
+ "justification": {
+  "ru": "оправдание, обоснование"
+ },
+ "hesitation": {
+  "ru": "колебание, нерешительность"
+ },
+ "jerky": {
+  "ru": "вяленое мясо"
+ },
+ "ancestors": {
+  "ru": "предки"
+ },
+ "sound control": {
+  "ru": "регулятор звука"
+ },
+ "rural area": {
+  "ru": "сельская местность"
+ },
+ "palm tree": {
+  "ru": "пальма"
+ },
+ "countryside": {
+  "ru": "сельская местность, загород"
+ },
+ "injuries": {
+  "ru": "травмы"
+ },
+ "captain": {
+  "ru": "капитан"
+ },
+ "USSR": {
+  "ru": "СССР"
+ },
+ "the Internet": {
+  "ru": "интернет"
+ },
+ "dormitory": {
+  "ru": "общежитие"
+ },
+ "burn": {
+  "ru": "гореть, жечь"
+ },
+ "born": {
+  "ru": "рождённый"
+ },
+ "match": {
+  "ru": "матч; спичка; подходить"
+ },
+ "stomach": {
+  "ru": "желудок, живот"
+ },
+ "demons": {
+  "ru": "демоны"
+ },
+ "suicide note": {
+  "ru": "предсмертная записка"
+ },
+ "court": {
+  "ru": "суд"
+ },
+ "DNA": {
+  "ru": "ДНК"
+ },
+ "the death penalty": {
+  "ru": "смертная казнь"
+ },
+ "abolish": {
+  "ru": "отменять, упразднять"
+ },
+ "trial": {
+  "ru": "судебный процесс"
+ },
+ "prosecutor": {
+  "ru": "прокурор"
+ },
+ "jury": {
+  "ru": "присяжные"
+ },
+ "to plead guilty": {
+  "ru": "признать себя виновным"
+ },
+ "accused": {
+  "ru": "обвиняемый"
+ },
+ "be acquitted": {
+  "ru": "быть оправданным"
+ },
+ "salesman": {
+  "ru": "продавец"
+ },
+ "must": {
+  "ru": "должен"
+ },
+ "prefix": {
+  "ru": "приставка"
+ },
+ "throw//through": {
+  "skip": true
+ },
+ "evaluate": {
+  "ru": "оценивать"
+ },
+ "value": {
+  "ru": "ценить"
+ },
+ "survival": {
+  "ru": "выживание"
+ },
+ "fond of": {
+  "ru": "любить, быть привязанным к"
+ },
+ "keen on": {
+  "ru": "увлекаться, быть в восторге от"
+ },
+ "inmate": {
+  "ru": "заключённый"
+ },
+ "policy": {
+  "ru": "политика (правила, курс)"
+ },
+ "indian summer": {
+  "ru": "бабье лето"
+ },
+ "get acquainted with": {
+  "ru": "познакомиться с"
+ },
+ "it struck me": {
+  "ru": "меня осенило"
+ },
+ "not to jinx": {
+  "ru": "чтобы не сглазить"
+ },
+ "it crossed my mind": {
+  "ru": "мне пришло в голову"
+ },
+ "to be of 2 minds": {
+  "ru": "быть в раздумьях, колебаться"
+ },
+ "mind your own business": {
+  "ru": "не лезь не в своё дело"
+ },
+ "speak your mind": {
+  "ru": "высказывать своё мнение прямо"
+ },
+ "misconduct": {
+  "ru": "проступок, ненадлежащее поведение"
+ },
+ "embezzlement": {
+  "ru": "растрата, хищение"
+ },
+ "forgery": {
+  "ru": "подделка"
+ },
+ "forged signature": {
+  "ru": "поддельная подпись"
+ },
+ "tax evasion": {
+  "ru": "уклонение от налогов"
+ },
+ "abuse of power": {
+  "ru": "злоупотребление властью"
+ },
+ "data theft": {
+  "ru": "кража данных"
+ },
+ "disturb": {
+  "ru": "беспокоить, мешать"
+ },
+ "medical check-up": {
+  "ru": "медосмотр"
+ },
+ "venture": {
+  "ru": "рискованное предприятие"
+ },
+ "abrupt": {
+  "ru": "внезапный, резкий"
+ },
+ "menial": {
+  "ru": "чёрная, неквалифицированная (работа)"
+ },
+ "sauna": {
+  "ru": "сауна"
+ },
+ "contempt": {
+  "ru": "презрение"
+ },
+ "at my own pace": {
+  "ru": "в своём темпе"
+ },
+ "to have A better salary": {
+  "ru": "иметь зарплату получше"
+ },
+ "live out of a suitcase": {
+  "ru": "жить на чемоданах"
+ },
+ "there is nothing to say": {
+  "ru": "нечего сказать"
+ },
+ "manual labour": {
+  "ru": "ручной труд"
+ },
+ "envy": {
+  "ru": "зависть; завидовать"
+ },
+ "mental input": {
+  "ru": "умственный вклад"
+ },
+ "demand": {
+  "ru": "спрос; требовать"
+ },
+ "supply": {
+  "ru": "предложение; поставлять"
+ },
+ "picnic": {
+  "ru": "пикник"
+ },
+ "offend": {
+  "ru": "обижать"
+ },
+ "climb up the career ladder": {
+  "ru": "подниматься по карьерной лестнице"
+ },
+ "euro": {
+  "ru": "евро"
+ },
+ "be redundant": {
+  "ru": "попасть под сокращение"
+ },
+ "maternity leave": {
+  "ru": "декретный отпуск"
+ },
+ "opportunities for advancement": {
+  "ru": "возможности для карьерного роста"
+ },
+ "out of work / off work": {
+  "ru": "без работы / не на работе"
+ },
+ "job prospects": {
+  "ru": "карьерные перспективы"
+ },
+ "monotonous": {
+  "ru": "монотонный"
+ },
+ "certificate": {
+  "ru": "сертификат, свидетельство"
+ },
+ "rise": {
+  "ru": "подниматься, расти"
+ },
+ "raise": {
+  "ru": "поднимать, повышать"
+ },
+ "competitors": {
+  "ru": "конкуренты"
+ },
+ "it’s worth it": {
+  "ru": "оно того стоит"
+ },
+ "pay attention": {
+  "ru": "обращать внимание"
+ },
+ "meme": {
+  "ru": "мем"
+ },
+ "appointment": {
+  "ru": "запись (к врачу), встреча"
+ },
+ "training": {
+  "ru": "тренировка, обучение"
+ },
+ "movements": {
+  "ru": "движения"
+ },
+ "report": {
+  "ru": "отчёт, доклад"
+ },
+ "audience": {
+  "ru": "аудитория, зрители"
+ },
+ "asignment": {
+  "ru": "задание",
+  "en": "assignment"
+ },
+ "kindness": {
+  "ru": "доброта"
+ },
+ "evil": {
+  "ru": "зло; злой"
+ },
+ "short-tempered": {
+  "ru": "вспыльчивый"
+ },
+ "take it easy": {
+  "ru": "не напрягайся, расслабься"
+ },
+ "aisle": {
+  "ru": "проход (между рядами)"
+ },
+ "chatterbox": {
+  "ru": "болтун"
+ },
+ "therapist": {
+  "ru": "психотерапевт"
+ },
+ "keep up with": {
+  "ru": "не отставать от"
+ },
+ "legacy": {
+  "ru": "наследие"
+ },
+ "citizenship": {
+  "ru": "гражданство"
+ },
+ "detective": {
+  "ru": "детектив"
+ },
+ "haughty": {
+  "ru": "высокомерный"
+ },
+ "know-it-all": {
+  "ru": "всезнайка"
+ },
+ "knowledgeable": {
+  "ru": "знающий, осведомлённый"
+ },
+ "attentive": {
+  "ru": "внимательный"
+ },
+ "studious": {
+  "ru": "прилежный"
+ },
+ "joy": {
+  "ru": "радость"
+ },
+ "come up with": {
+  "ru": "придумать"
+ },
+ "like-minded": {
+  "ru": "единомышленники, близкие по духу"
+ },
+ "black ice": {
+  "ru": "гололёд"
+ },
+ "A hypochondriac": {
+  "ru": "ипохондрик"
+ },
+ "something obsolete": {
+  "ru": "что-то устаревшее"
+ },
+ "A naive person": {
+  "ru": "наивный человек"
+ },
+ "A fierce competitor": {
+  "ru": "яростный соперник"
+ },
+ "A furious person": {
+  "ru": "разъярённый человек"
+ },
+ "A gut feeling": {
+  "ru": "чутьё, интуиция"
+ },
+ "if you do not have the guts": {
+  "ru": "если не хватает смелости"
+ },
+ "A visionary": {
+  "ru": "визионер, провидец"
+ },
+ "A clumsy person": {
+  "ru": "неуклюжий человек"
+ },
+ "A dedicated person": {
+  "ru": "преданный своему делу человек"
+ },
+ "I hope": {
+  "ru": "я надеюсь"
+ },
+ "relatives": {
+  "ru": "родственники"
+ },
+ "tongue twister": {
+  "ru": "скороговорка"
+ },
+ "causative": {
+  "ru": "каузатив (have something done)"
+ },
+ "stove": {
+  "ru": "плита, печь"
+ },
+ "stroke": {
+  "ru": "инсульт"
+ },
+ "joy killer": {
+  "ru": "зануда, портящий веселье"
+ },
+ "never mind": {
+  "ru": "неважно, не бери в голову"
+ },
+ "murphy’s law": {
+  "ru": "закон подлости"
+ },
+ "clothes": {
+  "ru": "одежда"
+ },
+ "hurt": {
+  "ru": "ранить, болеть"
+ },
+ "portrait": {
+  "ru": "портрет"
+ },
+ "I can’t stand it": {
+  "ru": "терпеть не могу"
+ },
+ "sould out": {
+  "ru": "распродано",
+  "en": "sold out"
+ },
+ "stressed out": {
+  "ru": "в стрессе, измотанный"
+ },
+ "fever": {
+  "ru": "температура, жар"
+ },
+ "prevail": {
+  "ru": "преобладать, одержать верх"
+ },
+ "insists on": {
+  "ru": "настаивает на"
+ },
+ "asthma": {
+  "ru": "астма"
+ },
+ "obesity": {
+  "ru": "ожирение"
+ },
+ "pneumonia": {
+  "ru": "пневмония"
+ },
+ "accountant": {
+  "ru": "бухгалтер"
+ },
+ "mug coaster": {
+  "ru": "подставка под кружку"
+ },
+ "rot": {
+  "ru": "гнить; гниль"
+ },
+ "brain rot": {
+  "ru": "деградация мозга (от контента)"
+ },
+ "fabled": {
+  "ru": "легендарный, сказочный"
+ },
+ "carve": {
+  "ru": "вырезать (по дереву, камню)"
+ },
+ "disintegrate": {
+  "ru": "распадаться"
+ },
+ "mausoleum": {
+  "ru": "мавзолей"
+ },
+ "melting pot": {
+  "ru": "плавильный котёл"
+ },
+ "refugee camp": {
+  "ru": "лагерь беженцев"
+ },
+ "political asylum": {
+  "ru": "политическое убежище"
+ },
+ "bare minimum": {
+  "ru": "самый минимум"
+ },
+ "croatia": {
+  "ru": "Хорватия"
+ },
+ "revenge": {
+  "ru": "месть"
+ },
+ "white crow": {
+  "ru": "белая ворона"
+ },
+ "politics": {
+  "ru": "политика (сфера)"
+ },
+ "throw up": {
+  "ru": "тошнить, рвать"
+ },
+ "blackout": {
+  "ru": "отключение света; потеря сознания"
+ },
+ "A hangover": {
+  "ru": "похмелье"
+ },
+ "hairs": {
+  "ru": "волоски"
+ },
+ "tie the knot": {
+  "ru": "пожениться"
+ },
+ "to blank": {
+  "ru": "игнорировать, не замечать"
+ },
+ "provider": {
+  "ru": "кормилец"
+ },
+ "shotgun wedding": {
+  "ru": "свадьба «по залёту»"
+ },
+ "shrink": {
+  "ru": "мозгоправ (психотерапевт)"
+ },
+ "file for divorce": {
+  "ru": "подать на развод"
+ },
+ "infidelity": {
+  "ru": "измена"
+ },
+ "arguments": {
+  "ru": "споры, ссоры"
+ },
+ "fights": {
+  "ru": "ссоры, драки"
+ },
+ "compatibility": {
+  "ru": "совместимость"
+ },
+ "lack of commitment": {
+  "ru": "нежелание брать обязательства"
+ },
+ "to go ice-skating": {
+  "ru": "кататься на коньках"
+ },
+ "ice-rink": {
+  "ru": "каток"
+ },
+ "firework": {
+  "ru": "фейерверк"
+ },
+ "move to": {
+  "ru": "переехать в"
+ },
+ "ride a sleigh": {
+  "ru": "кататься на санях"
+ },
+ "pull": {
+  "ru": "тянуть"
+ },
+ "ceiling": {
+  "ru": "потолок"
+ },
+ "tinsel": {
+  "ru": "мишура"
+ },
+ "garland": {
+  "ru": "гирлянда"
+ },
+ "cut off": {
+  "ru": "отрезать, отключить"
+ },
+ "compared with": {
+  "ru": "по сравнению с"
+ },
+ "flexible": {
+  "ru": "гибкий"
+ },
+ "mediterranean": {
+  "ru": "средиземноморский"
+ },
+ "lingua franca": {
+  "ru": "язык межнационального общения"
+ },
+ "correct": {
+  "ru": "правильный; исправлять"
+ },
+ "indigenous": {
+  "ru": "коренной"
+ },
+ "inversion": {
+  "ru": "инверсия"
+ },
+ "hybrid": {
+  "ru": "гибрид, гибридный"
+ },
+ "mode": {
+  "ru": "режим"
+ },
+ "automatic pass": {
+  "ru": "автомат (зачёт)"
+ },
+ "filter": {
+  "ru": "фильтр"
+ },
+ "crucial": {
+  "ru": "решающий, ключевой"
+ },
+ "critical": {
+  "ru": "критический, важный"
+ },
+ "equivalents": {
+  "ru": "эквиваленты"
+ },
+ "borrowing": {
+  "ru": "заимствование"
+ },
+ "athlete": {
+  "ru": "спортсмен"
+ },
+ "knowledge": {
+  "ru": "знания"
+ },
+ "one another": {
+  "ru": "друг друга"
+ },
+ "torn": {
+  "ru": "разрываться (между вариантами)"
+ },
+ "on the fence": {
+  "ru": "не определился"
+ },
+ "of 2 minds": {
+  "ru": "в раздумьях",
+  "en": "of two minds"
+ },
+ "donkey": {
+  "ru": "осёл"
+ },
+ "politician": {
+  "ru": "политик"
+ },
+ "congratulate you on": {
+  "ru": "поздравить тебя с"
+ },
+ "postpone": {
+  "ru": "откладывать, переносить"
+ },
+ "put off": {
+  "ru": "откладывать"
+ },
+ "take after": {
+  "ru": "быть похожим на (родителя)"
+ },
+ "to immerse": {
+  "ru": "погружать(ся)"
+ },
+ "redundancy": {
+  "ru": "сокращение (штата)"
+ },
+ "get redundant": {
+  "ru": "попасть под сокращение"
+ },
+ "to be put off": {
+  "ru": "потерять интерес, оттолкнуло"
+ },
+ "be on the same page": {
+  "ru": "быть на одной волне"
+ },
+ "get straight to the point": {
+  "ru": "перейти сразу к делу"
+ },
+ "in a nutshell": {
+  "ru": "в двух словах"
+ },
+ "beat around the bush": {
+  "ru": "ходить вокруг да около"
+ },
+ "put it in plain English": {
+  "ru": "сказать простыми словами"
+ },
+ "speak off the cuff": {
+  "ru": "говорить экспромтом"
+ },
+ "tragedy": {
+  "ru": "трагедия"
+ },
+ "linguist": {
+  "ru": "лингвист"
+ },
+ "think outside of the box": {
+  "ru": "мыслить нестандартно"
+ },
+ "deliberately": {
+  "ru": "намеренно"
+ },
+ "inferior": {
+  "ru": "худший, низший"
+ },
+ "the Devils advocate": {
+  "ru": "адвокат дьявола",
+  "en": "the devil's advocate"
+ },
+ "immerse": {
+  "ru": "погружать(ся)"
+ },
+ "burn out": {
+  "ru": "выгореть"
+ },
+ "deaf": {
+  "ru": "глухой"
+ },
+ "firecracker": {
+  "ru": "петарда"
+ },
+ "hut": {
+  "ru": "хижина"
+ },
+ "there used to be": {
+  "ru": "раньше здесь был(о)"
+ },
+ "puddle": {
+  "ru": "лужа"
+ },
+ "self-programming": {
+  "ru": "самопрограммирование"
+ },
+ "usage": {
+  "ru": "использование, употребление"
+ },
+ "exhaust the land": {
+  "ru": "истощать землю"
+ },
+ "stare": {
+  "ru": "пристально смотреть"
+ },
+ "orphanage": {
+  "ru": "детский дом"
+ },
+ "scold": {
+  "ru": "ругать, отчитывать"
+ },
+ "specter": {
+  "ru": "призрак"
+ },
+ "alarm": {
+  "ru": "будильник; тревога"
+ },
+ "candle": {
+  "ru": "свеча"
+ },
+ "anonymous": {
+  "ru": "анонимный"
+ },
+ "make a mistake": {
+  "ru": "сделать ошибку"
+ },
+ "teeth": {
+  "ru": "зубы"
+ },
+ "braces": {
+  "ru": "брекеты"
+ },
+ "run away": {
+  "ru": "убежать"
+ },
+ "rake": {
+  "ru": "грабли"
+ },
+ "whereas": {
+  "ru": "тогда как, в то время как"
+ },
+ "ring": {
+  "ru": "звенеть, звонить"
+ },
+ "saintly": {
+  "ru": "святой, праведный"
+ },
+ "materialistic": {
+  "ru": "меркантильный"
+ },
+ "bitchy": {
+  "ru": "стервозный"
+ },
+ "immature": {
+  "ru": "незрелый, инфантильный"
+ },
+ "cunning": {
+  "ru": "хитрый"
+ },
+ "tradwife": {
+  "ru": "традиционная жена, домохозяйка"
+ },
+ "baggy": {
+  "ru": "мешковатый"
+ },
+ "put up with": {
+  "ru": "мириться с"
+ },
+ "politics Policy": {
+  "skip": true
+ },
+ "half-sister/step-sister": {
+  "ru": "сводная сестра"
+ },
+ "fear (not fearness)": {
+  "ru": "страх"
+ },
+ "railing": {
+  "ru": "перила, ограждение"
+ },
+ "handrail": {
+  "ru": "поручень"
+ },
+ "folk": {
+  "ru": "народный; люди"
+ },
+ "fatigue": {
+  "ru": "усталость"
+ },
+ "imply": {
+  "ru": "подразумевать"
+ },
+ "semester": {
+  "ru": "семестр"
+ },
+ "thesis defence": {
+  "ru": "защита диплома"
+ },
+ "blue-eyed": {
+  "ru": "голубоглазый; наивный"
+ },
+ "take up": {
+  "ru": "начать заниматься"
+ },
+ "household": {
+  "ru": "домохозяйство, семья"
+ },
+ "overseas": {
+  "ru": "за границей, заморский"
+ },
+ "a leg up": {
+  "ru": "помощь, поддержка"
+ },
+ "exposed": {
+  "ru": "открытый, незащищённый"
+ },
+ "icicle": {
+  "ru": "сосулька"
+ },
+ "danger": {
+  "ru": "опасность"
+ },
+ "glitch": {
+  "ru": "сбой, глюк"
+ },
+ "bilingual": {
+  "ru": "двуязычный"
+ },
+ "bilingualism": {
+  "ru": "билингвизм"
+ },
+ "seasoned": {
+  "ru": "опытный"
+ },
+ "executive": {
+  "ru": "руководитель"
+ },
+ "CEO (Chief Executive Officer)": {
+  "ru": "генеральный директор"
+ },
+ "stand out": {
+  "ru": "выделяться"
+ },
+ "firefighter": {
+  "ru": "пожарный"
+ },
+ "block": {
+  "ru": "квартал; блокировать"
+ },
+ "array": {
+  "ru": "массив, множество"
+ },
+ "give a leg up": {
+  "ru": "помочь, подсобить"
+ },
+ "wicked": {
+  "ru": "злой, порочный"
+ },
+ "infamously": {
+  "ru": "печально известный тем, что"
+ },
+ "cowardly": {
+  "ru": "трусливый"
+ },
+ "with hindsight": {
+  "ru": "задним числом, оглядываясь назад"
+ },
+ "twisted manipulator": {
+  "ru": "извращённый манипулятор"
+ },
+ "notorious": {
+  "ru": "печально известный"
+ },
+ "ingenious": {
+  "ru": "гениальный, изобретательный"
+ },
+ "embarked": {
+  "ru": "отправился, приступил"
+ },
+ "rendezvous": {
+  "ru": "рандеву, встреча"
+ },
+ "lean": {
+  "ru": "опираться; худой"
+ },
+ "love affair": {
+  "ru": "роман, любовная связь"
+ },
+ "ridiculed": {
+  "ru": "высмеянный"
+ },
+ "get over": {
+  "ru": "пережить, оправиться"
+ },
+ "get rid of": {
+  "ru": "избавиться от"
+ },
+ "pay off": {
+  "ru": "окупиться; погасить (долг)"
+ },
+ "dean": {
+  "ru": "декан"
+ },
+ "dean’s office": {
+  "ru": "деканат"
+ },
+ "dumped": {
+  "ru": "бросили (в отношениях)"
+ },
+ "infinite": {
+  "ru": "бесконечный"
+ },
+ "civilised": {
+  "ru": "цивилизованный"
+ },
+ "not humane": {
+  "ru": "негуманный"
+ },
+ "furious": {
+  "ru": "взбешённый"
+ },
+ "steal": {
+  "ru": "красть"
+ },
+ "to be given an appointment": {
+  "ru": "получить запись (на приём)"
+ },
+ "tour": {
+  "ru": "тур, экскурсия"
+ },
+ "you end up working": {
+  "ru": "в итоге ты работаешь"
+ },
+ "turn out": {
+  "ru": "оказаться"
+ },
+ "fill a tooth": {
+  "ru": "запломбировать зуб"
+ },
+ "dental prosthesis": {
+  "ru": "зубной протез"
+ },
+ "saliva": {
+  "ru": "слюна"
+ },
+ "suggest": {
+  "ru": "предлагать"
+ },
+ "take credit for other people's work": {
+  "ru": "присваивать чужие заслуги"
+ },
+ "I'm loath to": {
+  "ru": "мне очень не хочется"
+ },
+ "donate": {
+  "ru": "жертвовать"
+ },
+ "undervalue": {
+  "ru": "недооценивать"
+ },
+ "devalue": {
+  "ru": "обесценивать"
+ },
+ "bond": {
+  "ru": "связь, узы; облигация"
+ },
+ "pull over": {
+  "ru": "остановиться у обочины"
+ },
+ "overdue": {
+  "ru": "просроченный"
+ },
+ "due time": {
+  "ru": "свой срок"
+ },
+ "due date": {
+  "ru": "срок сдачи; ПДР"
+ },
+ "expired": {
+  "ru": "истёкший, просроченный"
+ },
+ "talk into": {
+  "ru": "уговорить",
+  "en": "talk someone into"
+ },
+ "convince": {
+  "ru": "убедить"
+ },
+ "out of the blue": {
+  "ru": "как гром среди ясного неба"
+ },
+ "in time": {
+  "ru": "вовремя (заранее, успеть)"
+ },
+ "on time": {
+  "ru": "вовремя (точно по расписанию)"
+ },
+ "mental exhaustion": {
+  "ru": "умственное истощение"
+ },
+ "my ass is kicked (informal)": {
+  "ru": "мне конец, меня размазали (разг.)"
+ },
+ "come over": {
+  "ru": "зайти в гости"
+ },
+ "sustainable": {
+  "ru": "устойчивый, экологичный"
+ },
+ "sustainability": {
+  "ru": "устойчивое развитие"
+ },
+ "sustainability in business": {
+  "ru": "устойчивость в бизнесе"
+ },
+ "priest": {
+  "ru": "священник"
+ },
+ "orthodox": {
+  "ru": "православный"
+ },
+ "easter": {
+  "ru": "Пасха"
+ },
+ "on the outskirts": {
+  "ru": "на окраине"
+ },
+ "glory": {
+  "ru": "слава"
+ },
+ "hustle": {
+  "ru": "суета; пахать ради успеха"
+ },
+ "hustle culture": {
+  "ru": "культура постоянной работы"
+ },
+ "hangover": {
+  "ru": "похмелье"
+ },
+ "babysit": {
+  "ru": "сидеть с ребёнком"
+ },
+ "examine": {
+  "ru": "осматривать, изучать"
+ },
+ "the reason FOR": {
+  "ru": "причина чего-то"
+ },
+ "blizzard": {
+  "ru": "метель, буран"
+ },
+ "meet the deadline": {
+  "ru": "уложиться в срок"
+ },
+ "broadway": {
+  "ru": "Бродвей"
+ },
+ "breath (noun)": {
+  "ru": "дыхание"
+ },
+ "to breathe (verb)": {
+  "ru": "дышать"
+ },
+ "get away with it": {
+  "ru": "выйти сухим из воды"
+ },
+ "stick to my guns": {
+  "ru": "стоять на своём"
+ },
+ "lag behind": {
+  "ru": "отставать"
+ },
+ "second-hand embarrassment": {
+  "ru": "испанский стыд"
+ },
+ "climax": {
+  "ru": "кульминация"
+ },
+ "authorities": {
+  "ru": "власти"
+ },
+ "A stuntman": {
+  "ru": "каскадёр"
+ },
+ "to outnumber": {
+  "ru": "превосходить численно"
+ },
+ "A trooper": {
+  "ru": "солдат, стойкий человек"
+ },
+ "to siege": {
+  "ru": "осаждать"
+ },
+ "to avoid": {
+  "ru": "избегать"
+ },
+ "to turn a blind eye": {
+  "ru": "закрывать глаза на"
+ },
+ "all in all": {
+  "ru": "в целом"
+ },
+ "as a matter of fact": {
+  "ru": "на самом деле"
+ },
+ "nevertheless": {
+  "ru": "тем не менее"
+ },
+ "regret": {
+  "ru": "сожалеть"
+ },
+ "to take into account": {
+  "ru": "учитывать"
+ },
+ "a colleague": {
+  "ru": "коллега"
+ },
+ "to settle everything": {
+  "ru": "уладить всё"
+ },
+ "the board": {
+  "ru": "совет директоров"
+ },
+ "to land the job": {
+  "ru": "получить работу"
+ },
+ "whereabouts": {
+  "ru": "местонахождение"
+ },
+ "downtown": {
+  "ru": "центр города"
+ },
+ "slavery": {
+  "ru": "рабство"
+ },
+ "recruitment": {
+  "ru": "найм, рекрутинг"
+ },
+ "to break the ice": {
+  "ru": "растопить лёд"
+ },
+ "ADHD (Attention Deficit Hyperactivity Disorder)": {
+  "ru": "СДВГ"
+ },
+ "to hum": {
+  "ru": "напевать, гудеть"
+ },
+ "to sigh": {
+  "ru": "вздыхать"
+ },
+ "hold music": {
+  "ru": "музыка ожидания на линии"
+ },
+ "to creak": {
+  "ru": "скрипеть"
+ },
+ "to drip": {
+  "ru": "капать"
+ },
+ "to crunch": {
+  "ru": "хрустеть"
+ },
+ "a pseudo-documentary": {
+  "ru": "псевдодокументальный фильм"
+ },
+ "to misjudge": {
+  "ru": "недооценить, неверно оценить"
+ },
+ "to whisper": {
+  "ru": "шептать"
+ },
+ "rear": {
+  "ru": "задний"
+ },
+ "a pet peeve": {
+  "ru": "то, что особенно бесит"
+ },
+ "bad odor": {
+  "ru": "неприятный запах"
+ },
+ "to strive to": {
+  "ru": "стремиться к"
+ },
+ "relieved": {
+  "ru": "испытывающий облегчение"
+ },
+ "to gasp": {
+  "ru": "ахнуть"
+ },
+ "to renew": {
+  "ru": "продлевать, обновлять"
+ },
+ "power of attorney": {
+  "ru": "доверенность"
+ },
+ "an administrative offence": {
+  "ru": "административное правонарушение"
+ },
+ "a bob cut": {
+  "ru": "стрижка каре"
+ },
+ "poplar fluff": {
+  "ru": "тополиный пух"
+ },
+ "a birch": {
+  "ru": "берёза"
+ },
+ "to sneeze": {
+  "ru": "чихать"
+ },
+ "a fan": {
+  "ru": "вентилятор; фанат"
+ },
+ "to bear": {
+  "ru": "выносить, терпеть; нести"
+ },
+ "to carry": {
+  "ru": "нести"
+ },
+ "well off": {
+  "ru": "обеспеченный"
+ },
+ "a cemetery": {
+  "ru": "кладбище"
+ },
+ "urgent": {
+  "ru": "срочный"
+ },
+ "a lawnmower": {
+  "ru": "газонокосилка"
+ },
+ "to mow": {
+  "ru": "косить"
+ },
+ "obsessed with": {
+  "ru": "одержим чем-то"
+ },
+ "hell bent on": {
+  "ru": "решительно настроен на"
+ },
+ "enormous": {
+  "ru": "огромный"
+ },
+ "sick leave": {
+  "ru": "больничный"
+ },
+ "certainty": {
+  "ru": "уверенность"
+ },
+ "a sharp mind": {
+  "ru": "острый ум"
+ },
+ "disastrous": {
+  "ru": "катастрофический"
+ },
+ "to get the hang of it": {
+  "ru": "наловчиться, приноровиться"
+ },
+ "to learn the ropes": {
+  "ru": "разобраться, что к чему"
+ },
+ "a thief": {
+  "ru": "вор"
+ },
+ "verse and chorus": {
+  "ru": "куплет и припев"
+ },
+ "I should've done": {
+  "ru": "мне следовало сделать"
+ },
+ "an address": {
+  "ru": "адрес"
+ },
+ "stuck": {
+  "ru": "застрял"
+ },
+ "an aisle": {
+  "ru": "проход"
+ },
+ "thoroughly": {
+  "ru": "тщательно"
+ },
+ "a dash": {
+  "ru": "тире; рывок"
+ },
+ "dystopia": {
+  "ru": "антиутопия"
+ },
+ "swings": {
+  "ru": "качели"
+ },
+ "implausible": {
+  "ru": "неправдоподобный"
+ },
+ "to exaggerate": {
+  "ru": "преувеличивать"
+ },
+ "to adore": {
+  "ru": "обожать"
+ },
+ "to anticipate": {
+  "ru": "предвидеть, ожидать"
+ },
+ "a rhetorical question": {
+  "ru": "риторический вопрос"
+ },
+ "fend off": {
+  "ru": "отбиваться, отражать"
+ },
+ "cognitively engaged": {
+  "ru": "умственно вовлечённый"
+ },
+ "aging": {
+  "ru": "старение"
+ },
+ "assess the information": {
+  "ru": "оценивать информацию"
+ },
+ "reassuring": {
+  "ru": "обнадёживающий"
+ },
+ "to be exposed": {
+  "ru": "подвергаться воздействию"
+ },
+ "interlink": {
+  "ru": "взаимосвязывать"
+ },
+ "fascinating": {
+  "ru": "увлекательный"
+ },
+ "alzheimer": {
+  "ru": "болезнь Альцгеймера"
+ },
+ "to go fishing": {
+  "ru": "пойти на рыбалку"
+ },
+ "a midge": {
+  "ru": "мошка"
+ },
+ "a swarm of midges": {
+  "ru": "рой мошкары"
+ },
+ "a swamp": {
+  "ru": "болото"
+ },
+ "anti-plagiarism": {
+  "ru": "антиплагиат"
+ },
+ "a TV host": {
+  "ru": "телеведущий"
+ },
+ "an assessment": {
+  "ru": "оценка"
+ },
+ "to rat out": {
+  "ru": "сдать, настучать"
+ },
+ "to waste on": {
+  "ru": "тратить впустую на",
+  "en": "to waste something on"
+ },
+ "evaluated": {
+  "ru": "оценённый"
+ },
+ "valued": {
+  "ru": "ценный, ценимый"
+ },
+ "an anchor (TV)": {
+  "ru": "ведущий новостей"
+ },
+ "magnificent": {
+  "ru": "великолепный"
+ },
+ "a milestone": {
+  "ru": "важный этап, веха"
+ },
+ "vague": {
+  "ru": "расплывчатый"
+ },
+ "a sweatshop": {
+  "ru": "потогонное производство"
+ },
+ "not even once": {
+  "ru": "ни разу"
+ },
+ "to pass into": {
+  "ru": "переходить в"
+ },
+ "to have a hard time doing something": {
+  "ru": "с трудом что-то делать"
+ },
+ "looks weird": {
+  "ru": "выглядит странно"
+ },
+ "severance pay": {
+  "ru": "выходное пособие"
+ },
+ "employers": {
+  "ru": "работодатели"
+ },
+ "a dweller": {
+  "ru": "житель"
+ },
+ "to cram": {
+  "ru": "зубрить"
+ },
+ "a frenzy": {
+  "ru": "безумие, ажиотаж"
+ },
+ "a sequence": {
+  "ru": "последовательность"
+ },
+ "clogged": {
+  "ru": "засорённый"
+ },
+ "time to spare": {
+  "ru": "свободное время"
+ },
+ "to afford": {
+  "ru": "позволить себе"
+ },
+ "to be notified": {
+  "ru": "быть уведомлённым"
+ },
+ "in limbo": {
+  "ru": "в подвешенном состоянии"
+ },
+ "to give the ick": {
+  "ru": "вызывать отвращение, отталкивать",
+  "en": "to give someone the ick"
+ },
+ "to prefer something over something": {
+  "ru": "предпочитать одно другому"
+ },
+ "an emergency": {
+  "ru": "чрезвычайная ситуация"
+ },
+ "to be accustomed to": {
+  "ru": "привыкнуть к"
+ },
+ "to examine": {
+  "ru": "осматривать"
+ },
+ "sweat": {
+  "ru": "пот; потеть"
+ },
+ "vikings": {
+  "ru": "викинги"
+ },
+ "a stove": {
+  "ru": "плита"
+ },
+ "to talk to": {
+  "ru": "разговаривать с"
+ },
+ "absent-minded": {
+  "ru": "рассеянный"
+ },
+ "a closet": {
+  "ru": "шкаф, кладовка"
+ },
+ "to walk": {
+  "ru": "ходить пешком"
+ },
+ "to make up for lost time": {
+  "ru": "наверстать упущенное"
+ },
+ "to explode": {
+  "ru": "взрываться"
+ },
+ "it's less polluted": {
+  "ru": "там менее загрязнённо"
+ },
+ "an orchestra": {
+  "ru": "оркестр"
+ },
+ "flawless": {
+  "ru": "безупречный"
+ },
+ "flawed": {
+  "ru": "с изъянами"
+ },
+ "an autopsy": {
+  "ru": "вскрытие"
+ },
+ "gasoline": {
+  "ru": "бензин"
+ },
+ "pleasant": {
+  "ru": "приятный"
+ },
+ "enjoyable": {
+  "ru": "приятный, доставляющий удовольствие"
+ },
+ "research (uncountable)": {
+  "ru": "исследование"
+ },
+ "for good": {
+  "ru": "навсегда"
+ },
+ "hierarchy": {
+  "ru": "иерархия"
+ },
+ "to pay attention to": {
+  "ru": "обращать внимание на"
+ },
+ "a warehouse": {
+  "ru": "склад"
+ },
+ "to prevail": {
+  "ru": "преобладать"
+ },
+ "birth rate": {
+  "ru": "рождаемость"
+ },
+ "to be on a budget": {
+  "ru": "жить на ограниченный бюджет"
+ },
+ "to be on a shoestring budget": {
+  "ru": "жить впроголодь, при мизерном бюджете"
+ },
+ "risen": {
+  "ru": "поднявшийся (3-я форма rise)"
+ },
+ "to flush": {
+  "ru": "смывать (в унитазе); краснеть"
+ },
+ "payday loans": {
+  "ru": "микрозаймы до зарплаты"
+ },
+ "a rouble": {
+  "ru": "рубль"
+ },
+ "a grain of truth": {
+  "ru": "доля правды"
+ },
+ "well-paid": {
+  "ru": "высокооплачиваемый"
+ },
+ "a crematorium": {
+  "ru": "крематорий"
+ },
+ "once a year": {
+  "ru": "раз в год"
+ },
+ "to commemorate": {
+  "ru": "чтить память"
+ },
+ "to lead to": {
+  "ru": "приводить к"
+ },
+ "consumption": {
+  "ru": "потребление"
+ },
+ "a snowball": {
+  "ru": "снежок"
+ },
+ "to go hiking": {
+  "ru": "пойти в поход"
+ },
+ "a debt ceiling": {
+  "ru": "потолок госдолга"
+ },
+ "a downgrade": {
+  "ru": "понижение (рейтинга)"
+ },
+ "to issue bonds": {
+  "ru": "выпускать облигации"
+ },
+ "to take on debt": {
+  "ru": "влезать в долги"
+ },
+ "a baseboard": {
+  "ru": "плинтус"
+ },
+ "a slip": {
+  "ru": "оговорка; поскользнуться"
+ },
+ "a significant other (formal)": {
+  "ru": "вторая половинка"
+ },
+ "productivity": {
+  "ru": "продуктивность"
+ },
+ "crumbles": {
+  "ru": "крошки; рушится"
+ },
+ "a safe": {
+  "ru": "сейф"
+ },
+ "a novel": {
+  "ru": "роман"
+ },
+ "to come by": {
+  "ru": "достать, раздобыть; заглянуть"
+ },
+ "to keep one's head above water": {
+  "ru": "держаться на плаву"
+ },
+ "a yacht": {
+  "ru": "яхта"
+ },
+ "scrooge": {
+  "ru": "скряга"
+ },
+ "closure": {
+  "ru": "завершённость, закрытие гештальта"
+ },
+ "to get closure": {
+  "ru": "закрыть гештальт"
+ },
+ "to attend classes": {
+  "ru": "посещать занятия"
+ },
+ "neuroscience": {
+  "ru": "нейробиология"
+ },
+ "obsolete": {
+  "ru": "устаревший"
+ },
+ "to disguise": {
+  "ru": "маскировать"
+ },
+ "to be willing": {
+  "ru": "быть готовым (что-то сделать)"
+ },
+ "I'm cooked (informal slang)": {
+  "ru": "мне конец (сленг)"
+ },
+ "to look forward to": {
+  "ru": "с нетерпением ждать"
+ },
+ "to anticipate (formal)": {
+  "ru": "предвкушать, ожидать"
+ },
+ "a workshop": {
+  "ru": "мастер-класс, мастерская"
+ },
+ "to turn up": {
+  "ru": "появиться, прийти"
+ },
+ "to show up": {
+  "ru": "появиться"
+ },
+ "to stub your toe": {
+  "ru": "удариться пальцем ноги"
+ },
+ "to emerge (formal)": {
+  "ru": "появляться, возникать"
+ },
+ "a dental implant": {
+  "ru": "зубной имплант"
+ },
+ "a dental filling": {
+  "ru": "зубная пломба"
+ },
+ "an arch wire": {
+  "ru": "дуга (брекет-системы)"
+ },
+ "to pry open": {
+  "ru": "вскрыть, открыть силой"
+ },
+ "critics": {
+  "ru": "критики"
+ },
+ "blue-eyed (naive)": {
+  "ru": "наивный"
+ },
+ "a layover": {
+  "ru": "пересадка"
+ },
+ "hammered (informal)": {
+  "ru": "в хлам пьяный (разг.)"
+ },
+ "to throw up (informal)": {
+  "ru": "стошнить (разг.)"
+ },
+ "a sunflower": {
+  "ru": "подсолнух"
+ },
+ "naphthalene": {
+  "ru": "нафталин"
+ },
+ "reckless": {
+  "ru": "безрассудный"
+ },
+ "to engage": {
+  "ru": "вовлекать, заниматься"
+ },
+ "matter": {
+  "ru": "иметь значение; вещество"
+ },
+ "to hang up": {
+  "ru": "повесить трубку"
+ },
+ "to get through": {
+  "ru": "дозвониться; пройти через"
+ },
+ "to speak up": {
+  "ru": "говорить громче; высказаться"
+ },
+ "to put through to": {
+  "ru": "соединить с (по телефону)",
+  "en": "to put someone through to"
+ },
+ "an epoch (formal)": {
+  "ru": "эпоха"
+ },
+ "to rack one's brains": {
+  "ru": "ломать голову"
+ },
+ "daydreaming": {
+  "ru": "мечтательность, витание в облаках"
+ },
+ "to have one's head in the clouds": {
+  "ru": "витать в облаках"
+ },
+ "a landline": {
+  "ru": "стационарный телефон"
+ },
+ "a directory office": {
+  "ru": "справочная"
+ },
+ "anonymity": {
+  "ru": "анонимность"
+ },
+ "a carpenter": {
+  "ru": "плотник"
+ },
+ "to propose": {
+  "ru": "сделать предложение; предлагать"
+ },
+ "refugees": {
+  "ru": "беженцы"
+ },
+ "varsity (US)": {
+  "ru": "университетская сборная"
+ },
+ "antibiotics": {
+  "ru": "антибиотики"
+ },
+ "civilization": {
+  "ru": "цивилизация"
+ },
+ "a draw": {
+  "ru": "ничья"
+ },
+ "mud": {
+  "ru": "грязь (жидкая)"
+ },
+ "dirt": {
+  "ru": "грязь, пыль"
+ },
+ "a bumpy road": {
+  "ru": "ухабистая дорога"
+ },
+ "an obligation": {
+  "ru": "обязательство"
+ },
+ "a residence permit": {
+  "ru": "вид на жительство"
+ },
+ "to make a mistake": {
+  "ru": "сделать ошибку"
+ },
+ "angry at": {
+  "ru": "злой на"
+ },
+ "Spain": {
+  "en": "Spain"
+ },
+ "Egypt": {
+  "en": "Egypt"
+ },
+ "Turkey": {
+  "en": "Turkey"
+ },
+ "Crimea": {
+  "en": "Crimea"
+ },
+ "Home Alone": {
+  "en": "Home Alone"
+ },
+ "The Hague": {
+  "en": "The Hague"
+ },
+ "Norway": {
+  "en": "Norway"
+ },
+ "Denmark": {
+  "en": "Denmark"
+ },
+ "Czech Republic": {
+  "en": "Czech Republic"
+ },
+ "Macedonia": {
+  "en": "Macedonia"
+ },
+ "Montenegro": {
+  "en": "Montenegro"
+ },
+ "Jordan": {
+  "en": "Jordan"
+ },
+ "Squid Game": {
+  "en": "Squid Game"
+ },
+ "International Women’s Day": {
+  "en": "International Women’s Day"
+ },
+ "The Hitchhiker's Guide to the Galaxy": {
+  "en": "The Hitchhiker's Guide to the Galaxy"
+ },
+ "Middle Ages": {
+  "en": "Middle Ages"
+ },
+ "Einstein": {
+  "en": "Einstein"
+ },
+ "Silicon Valley": {
+  "en": "Silicon Valley"
+ },
+ "Croatia": {
+  "en": "Croatia"
+ },
+ "Easter": {
+  "en": "Easter"
+ },
+ "Broadway": {
+  "en": "Broadway"
+ },
+ "Georgian": {
+  "en": "Georgian"
+ },
+ "Mediterranean": {
+  "en": "Mediterranean"
+ },
+ "January": {
+  "en": "January"
+ },
+ "Vikings": {
+  "en": "Vikings"
+ },
+ "Alzheimer": {
+  "en": "Alzheimer"
+ },
+ "Scrooge": {
+  "en": "Scrooge"
+ },
+ "Karen": {
+  "en": "Karen"
+ },
+ "Murphy’s law": {
+  "en": "Murphy’s law"
+ },
+ "Indian summer": {
+  "en": "Indian summer"
+ },
+ "Sod’s law": {
+  "en": "Sod’s law"
+ },
+ "cut down on": {
+  "ru": "сократить (потребление чего-то)"
+ },
+ "stand for": {
+  "ru": "означать, расшифровываться как"
+ },
+ "used to": {
+  "ru": "раньше (делал, но перестал)"
+ },
+ "repetition": {
+  "ru": "повторение"
+ },
+ "talk shop": {
+  "ru": "говорить о работе (не к месту)"
+ },
+ "dough": {
+  "ru": "тесто"
+ },
+ "cameramen": {
+  "ru": "операторы"
+ },
+ "operator": {
+  "ru": "телефонист, оператор связи (ложный друг)"
+ },
+ "directed": {
+  "ru": "срежиссированный, направленный"
+ },
+ "particle": {
+  "ru": "частица (в фразовых глаголах: give UP)"
+ },
+ "break into": {
+  "ru": "взломать, вломиться"
+ },
+ "deemed": {
+  "ru": "признанный, считающийся"
+ },
+ "stake": {
+  "ru": "доля, ставка"
+ },
+ "as if": {
+  "ru": "как будто"
+ },
+ "sod’s Law": {
+  "ru": "закон подлости (брит.)"
+ },
+ "ain’t got": {
+  "ru": "нету (разг., = haven't got)"
+ },
+ "eczema": {
+  "ru": "экзема"
+ },
+ "recital": {
+  "ru": "сольный концерт"
+ },
+ "miasma": {
+  "ru": "миазмы, тяжёлая атмосфера"
+ },
+ "bring down": {
+  "ru": "свергнуть; расстроить"
+ },
+ "sustain": {
+  "ru": "поддерживать, выдерживать"
+ },
+ "I can't help wondering if": {
+  "ru": "не могу не задуматься, а что если"
+ },
+ "skies": {
+  "en": "skis"
+ },
+ "squads": {
+  "en": "squats"
+ },
+ "loose control": {
+  "en": "lose control"
+ },
+ "vice vesrta": {
+  "en": "vice versa"
+ },
+ "posseve pronouns": {
+  "en": "possessive pronouns"
+ },
+ "to broad your social circle": {
+  "en": "to broaden your social circle"
+ },
+ "run our of": {
+  "en": "run out of"
+ },
+ "attantive": {
+  "en": "attentive"
+ },
+ "sparking water": {
+  "en": "sparkling water"
+ },
+ "plung into": {
+  "en": "plunge into"
+ },
+ "give a sentence": {
+  "en": "sentence"
+ },
+ "figure/ ice Skating": {
+  "en": "figure/ ice skating"
+ },
+ "armful": {
+  "ru": "охапка"
+ }
+}

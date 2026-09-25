@@ -1,0 +1,7 @@
+# Raw Telegram export — contains personal data (phone, card number); keep it local only
+data/raw/
+ChatExport_*/
+
+__pycache__/
+.DS_Store
+Thumbs.db

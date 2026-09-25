@@ -1,0 +1,6 @@
+# Only the site itself is deployed: index.html, css/, js/, audio/
+scripts/
+data/
+ChatExport_*/
+README.md
+.gitignore
