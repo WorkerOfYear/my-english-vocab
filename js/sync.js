@@ -3,6 +3,8 @@
 (function (App) {
   const SYNCED = ["srs", "hard", "custom"];
   const online = /^https?:$/.test(location.protocol);
+  // Inside the Telegram Mini App the signed launch data replaces the sync key.
+  const tgInit = (App.tg && App.tg.initData) || "";
   const meta = Object.assign({ key: "", syncedAt: 0, dirty: false, lastOk: 0, error: "" }, App.store.get("syncMeta", {}));
   let applying = false;
   let timer = null;
@@ -15,7 +17,7 @@
   const rawSet = App.store.set;
   App.store.set = (key, value) => {
     rawSet(key, value);
-    if (!applying && SYNCED.includes(key) && meta.key) {
+    if (!applying && SYNCED.includes(key) && (meta.key || tgInit)) {
       meta.dirty = true;
       saveMeta();
       schedulePush();
@@ -25,7 +27,11 @@
   async function api(path, opts = {}) {
     const r = await fetch(path, {
       ...opts,
-      headers: { "Content-Type": "application/json", "x-sync-key": meta.key, ...(opts.headers || {}) },
+      headers: {
+        "Content-Type": "application/json",
+        ...(meta.key ? { "x-sync-key": meta.key } : { "x-telegram-init-data": tgInit }),
+        ...(opts.headers || {}),
+      },
     });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) throw Object.assign(new Error(data.error || `Ошибка сервера (${r.status})`), { status: r.status });
@@ -90,7 +96,7 @@
   }
 
   function run(task) {
-    if (!online || !meta.key) return Promise.resolve();
+    if (!online || !(meta.key || tgInit)) return Promise.resolve();
     busy = (busy || Promise.resolve()).then(task).then(() => {
       meta.error = "";
       meta.lastOk = Date.now();
@@ -129,11 +135,12 @@
 
   App.sync = {
     online,
-    get connected() { return online && !!meta.key; },
+    get connected() { return online && !!(meta.key || tgInit); },
+    get viaTelegram() { return online && !meta.key && !!tgInit; },
     get key() { return meta.key; },
     status() {
       if (!online) return "Синхронизация работает только на сайте в интернете, не из файла.";
-      if (!meta.key) return "";
+      if (!meta.key && !tgInit) return "";
       if (meta.error) return "⚠️ " + meta.error;
       if (meta.dirty) return "⏳ Сохраняю…";
       if (!meta.lastOk) return "⏳ Подключаюсь…";
@@ -167,6 +174,9 @@
       if (meta.error) throw new Error(meta.error);
       return api("/api/remind?test=1", { method: "POST" });
     },
+    // Bot: bind it to this learner (returns a one-time t.me link) and check whether it's bound.
+    setupBot() { return api("/api/telegram?setup=1", { method: "POST" }); },
+    botStatus() { return api("/api/telegram?status=1"); },
     pull,
   };
 

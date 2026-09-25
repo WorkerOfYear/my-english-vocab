@@ -111,13 +111,13 @@
 
         root.querySelector("#batch").onchange = (e) => { srs.setSettings({ batchSize: +e.target.value }); draw(); };
         root.querySelector("#order").onchange = (e) => { srs.setSettings({ order: e.target.value }); draw(); };
-        root.querySelector("#take").onclick = () => {
-          if (block && !confirm(`${block}\n\nВсё равно взять новую группу? Повторений станет больше.`)) return;
+        root.querySelector("#take").onclick = async () => {
+          if (block && !(await App.confirm(`${block}\n\nВсё равно взять новую группу? Повторений станет больше.`))) return;
           srs.takeGroup();
           draw();
         };
-        root.querySelectorAll("[data-remove]").forEach((b) => b.onclick = () => {
-          if (confirm("Удалить группу и её прогресс?")) { srs.removeGroup(+b.dataset.remove); draw(); }
+        root.querySelectorAll("[data-remove]").forEach((b) => b.onclick = async () => {
+          if (await App.confirm("Удалить группу и её прогресс?")) { srs.removeGroup(+b.dataset.remove); draw(); }
         });
         root.querySelector("#export").onclick = () => {
           const blob = new Blob([srs.exportJSON()], { type: "application/json" });
@@ -130,24 +130,29 @@
         root.querySelector("#import").onchange = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
-          try { srs.importJSON(await file.text()); App.renderFilter(); draw(); alert("Прогресс загружен"); }
-          catch (err) { alert("Не получилось загрузить: " + err.message); }
+          try { srs.importJSON(await file.text()); App.renderFilter(); draw(); App.alert("Прогресс загружен"); }
+          catch (err) { App.alert("Не получилось загрузить: " + err.message); }
         };
-        root.querySelector("#reset").onclick = () => {
-          if (confirm("Точно удалить все группы и прогресс повторений?")) { srs.reset(); draw(); }
+        root.querySelector("#reset").onclick = async () => {
+          if (await App.confirm("Точно удалить все группы и прогресс повторений?")) { srs.reset(); draw(); }
         };
         bindSync();
       }
 
       function syncCard() {
         const sync = App.sync;
+        const head = `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>`;
         if (!sync.online) {
-          return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
-            <p class="muted small">${esc(sync.status())} Открой сайт на Vercel, чтобы подключить напоминания.</p></div>`;
+          return `${head}<p class="muted small">${esc(sync.status())} Открой сайт на Vercel, чтобы подключить напоминания.</p></div>`;
+        }
+        if (sync.viaTelegram) {
+          return `${head}<p class="small">✅ Вход через Telegram — прогресс общий с сайтом.</p>
+            <p class="small" id="sync-status">${esc(sync.status())}</p>
+            <div class="row"><button class="btn" id="sync-test">📨 Прислать напоминание сейчас</button></div>
+            <p class="small" id="sync-msg"></p></div>`;
         }
         if (!sync.connected) {
-          return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
-            <p class="muted small">Прогресс будет одинаковым на телефоне и компьютере, а бот в Telegram будет присылать
+          return `${head}<p class="muted small">Прогресс будет одинаковым на телефоне и компьютере, а бот в Telegram будет присылать
             вечером ссылку на повторение. Введи ключ — это значение <code>SYNC_KEY</code> из настроек проекта в Vercel.</p>
             <form class="row" id="sync-form">
               <input class="field" id="sync-key" type="password" placeholder="Ключ синхронизации" autocomplete="off" style="flex:1;min-width:180px">
@@ -155,9 +160,10 @@
             </form>
             <p class="small" id="sync-status"></p></div>`;
         }
-        return `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>
-          <p class="small" id="sync-status">${esc(sync.status())}</p>
+        return `${head}<p class="small" id="sync-status">${esc(sync.status())}</p>
+          <p class="small" id="bot-status">🤖 Проверяю бота…</p>
           <div class="row">
+            <button class="btn" id="bot-setup">🤖 Подключить бота</button>
             <button class="btn" id="sync-test">📨 Проверить Telegram</button>
             <button class="btn" id="sync-link">📱 Подключить телефон</button>
             <button class="btn danger" id="sync-off">Отключить</button>
@@ -166,33 +172,56 @@
       }
 
       function bindSync() {
-        const form = root.querySelector("#sync-form");
+        const $ = (sel) => root.querySelector(sel);
+        const msg = (html) => { const el = $("#sync-msg"); if (el) el.innerHTML = html; };
+        const form = $("#sync-form");
         if (form) form.onsubmit = async (e) => {
           e.preventDefault();
-          const key = root.querySelector("#sync-key").value.trim();
+          const key = $("#sync-key").value.trim();
           if (!key) return;
-          root.querySelector("#sync-status").textContent = "⏳ Подключаюсь…";
+          $("#sync-status").textContent = "⏳ Подключаюсь…";
           try { await App.sync.connect(key); draw(); }
-          catch (err) { root.querySelector("#sync-status").textContent = "⚠️ " + err.message; }
+          catch (err) { $("#sync-status").textContent = "⚠️ " + err.message; }
         };
-        const msg = (t) => { const el = root.querySelector("#sync-msg"); if (el) el.textContent = t; };
-        const test = root.querySelector("#sync-test");
+        const botStatus = $("#bot-status");
+        if (botStatus) {
+          App.sync.botStatus().then((b) => {
+            botStatus.innerHTML = b.linked
+              ? `🤖 Бот <a href="https://t.me/${esc(b.bot)}" target="_blank" rel="noopener">@${esc(b.bot)}</a> подключён ✓`
+              : `🤖 Бот <b>@${esc(b.bot)}</b> ещё не привязан — нажми «Подключить бота»`;
+            if (b.linked) $("#bot-setup").textContent = "🤖 Переподключить бота";
+          }).catch((err) => { botStatus.textContent = "🤖 " + err.message; });
+        }
+        const setup = $("#bot-setup");
+        if (setup) setup.onclick = async () => {
+          msg("⏳ Настраиваю бота…");
+          try {
+            const r = await App.sync.setupBot();
+            msg(`Открой ссылку и нажми <b>Start</b> — бот запомнит тебя (ссылка работает час):<br>
+              <a class="btn primary" href="${esc(r.link)}" target="_blank" rel="noopener" style="margin-top:8px">Открыть @${esc(r.bot)} в Telegram</a>`);
+          } catch (err) { msg("⚠️ " + esc(err.message)); }
+        };
+        const test = $("#sync-test");
         if (test) test.onclick = async () => {
           msg("⏳ Отправляю…");
           try {
             const r = await App.sync.test();
             msg(r.sent ? "✅ Сообщение отправлено — проверь Telegram" : "Отправлено");
-          } catch (err) { msg("⚠️ " + err.message); }
+          } catch (err) { msg("⚠️ " + esc(err.message)); }
         };
-        const link = root.querySelector("#sync-link");
+        const link = $("#sync-link");
         if (link) link.onclick = async () => {
           const url = App.sync.deviceLink();
-          try { await navigator.clipboard.writeText(url); msg("🔗 Ссылка скопирована. Открой её на телефоне — он подключится сам. Никому её не отправляй."); }
-          catch (e) { prompt("Открой эту ссылку на телефоне:", url); }
+          try {
+            await navigator.clipboard.writeText(url);
+            msg("🔗 Ссылка скопирована. Открой её на телефоне — он подключится сам. Никому её не отправляй.");
+          } catch (e) {
+            msg(`Открой эту ссылку на телефоне (никому её не отправляй):<br><input class="field small" readonly value="${esc(url)}" onfocus="this.select()">`);
+          }
         };
-        const off = root.querySelector("#sync-off");
-        if (off) off.onclick = () => {
-          if (confirm("Отключить синхронизацию на этом устройстве? Прогресс останется в браузере.")) { App.sync.disconnect(); draw(); }
+        const off = $("#sync-off");
+        if (off) off.onclick = async () => {
+          if (await App.confirm("Отключить синхронизацию на этом устройстве? Прогресс останется в браузере.")) { App.sync.disconnect(); draw(); }
         };
       }
 

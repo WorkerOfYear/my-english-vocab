@@ -20,6 +20,13 @@ window.App = window.App || {};
     },
   };
 
+  // ---------- Telegram Mini App (null when opened as a normal website)
+  const tgApp = window.Telegram && window.Telegram.WebApp;
+  App.tg = tgApp && tgApp.initData ? tgApp : null;
+  // Native dialogs are unreliable inside Telegram — use its own popups there.
+  App.confirm = (msg) => (App.tg ? new Promise((r) => App.tg.showConfirm(msg, r)) : Promise.resolve(window.confirm(msg)));
+  App.alert = (msg) => (App.tg ? new Promise((r) => App.tg.showAlert(msg, () => r())) : Promise.resolve(window.alert(msg)));
+
   // ---------- small utils
   App.esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   App.shuffle = (arr) => {

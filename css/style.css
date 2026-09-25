@@ -40,6 +40,8 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.in-tg #back { display: none !important; }
+.in-tg .top { padding-top: 10px; }
 body {
   margin: 0;
   background: var(--bg);
@@ -269,6 +271,9 @@ code { font-size: .85em; background: var(--surface-2); border-radius: 4px; paddi
 .forecast .bar span { position: absolute; left: -4px; right: -4px; top: -14px; font-size: .65rem; line-height: 12px; text-align: center; color: var(--text); }
 .forecast .today .bar { opacity: 1; background: var(--bad); }
 .forecast .dlabel { font-size: .65rem; color: var(--muted); text-align: center; height: 14px; line-height: 14px; }
+
+/* touch screens: keyboard shortcut hints are noise */
+@media (hover: none) and (pointer: coarse) { kbd { display: none; } }
 
 @media (max-width: 420px) {
   .filter-wrap { position: static; }

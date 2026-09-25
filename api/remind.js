@@ -1,6 +1,6 @@
 // Daily Vercel Cron (see vercel.json) — sends a Telegram message if there are words to review today.
-// POST /api/remind?test=1 with x-sync-key sends a test message right away (used by the "Проверить" button).
-const { loadState, checkSyncKey, dueWords, sendReminder, send, handle, httpError } = require("./_lib");
+// POST /api/remind?test=1 (sync key or Mini App) sends a test message right away (used by the "Проверить" button).
+const { loadState, checkAuth, dueWords, sendReminder, send, handle, httpError } = require("./_lib");
 
 function fromCron(req) {
   const secret = process.env.CRON_SECRET;
@@ -10,7 +10,7 @@ function fromCron(req) {
 
 module.exports = handle(async (req, res) => {
   const test = /[?&]test=1\b/.test(req.url || "");
-  if (test) checkSyncKey(req);
+  if (test) await checkAuth(req);
   else if (!fromCron(req)) throw httpError(401, "Только для Vercel Cron");
 
   const doc = await loadState();

@@ -1,9 +1,9 @@
 // GET  /api/state  → { doc: {updatedAt, data} | null }
 // PUT  /api/state  body {updatedAt, base, data} → stores it if the stored version is still `base` (else 409)
-const { loadState, saveState, checkSyncKey, readJson, send, handle, httpError } = require("./_lib");
+const { loadState, saveState, checkAuth, readJson, send, handle, httpError } = require("./_lib");
 
 module.exports = handle(async (req, res) => {
-  checkSyncKey(req);
+  await checkAuth(req);
   if (req.method === "GET") return send(res, 200, { doc: await loadState() });
   if (req.method === "PUT" || req.method === "POST") {
     const doc = await readJson(req);

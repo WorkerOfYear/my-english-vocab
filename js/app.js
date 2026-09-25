@@ -144,9 +144,9 @@
           + (rows.length ? "" : `<p class="muted center">Ничего не найдено</p>`);
       };
       root.querySelector("#q").addEventListener("input", draw);
-      root.querySelector("#list").addEventListener("click", (e) => {
+      root.querySelector("#list").addEventListener("click", async (e) => {
         const b = e.target.closest("[data-remove]");
-        if (!b || !confirm(`Удалить «${b.dataset.remove}» из словаря?`)) return;
+        if (!b || !(await App.confirm(`Удалить «${b.dataset.remove}» из словаря?`))) return;
         App.removeWord(b.dataset.remove);
         const k = list.findIndex((w) => w.en === b.dataset.remove);
         if (k >= 0) list.splice(k, 1);
@@ -183,6 +183,12 @@
     root.innerHTML = `<div class="card center"><p>В выбранном периоде ${App.words(App.filtered().length)}, а нужно хотя бы ${need}.</p>
       <button class="btn" data-open-filter>📅 Изменить период</button></div>`;
   };
+
+  // Links from the Telegram bot open ?page=review; Telegram itself may put its launch data into the hash.
+  const startPage = new URLSearchParams(location.search).get("page");
+  if (startPage !== null || /^#tgWeb/.test(location.hash)) {
+    history.replaceState(null, "", location.pathname + (startPage ? "#" + startPage : ""));
+  }
 
   window.addEventListener("hashchange", () => { panelOpen = false; route(); });
   document.addEventListener("DOMContentLoaded", () => {

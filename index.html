@@ -18,12 +18,21 @@
   </header>
   <main id="page" class="page"></main>
 
+  <script>
+    // Telegram's Mini App SDK — only when opened inside Telegram (launch data in the hash, or a reload of such a page).
+    (function () {
+      var inTg = /tgWebApp/.test(location.hash) || window.TelegramWebviewProxy;
+      try { inTg = inTg || sessionStorage.getItem("__telegram__initParams"); } catch (e) {}
+      if (inTg) document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
+    })();
+  </script>
   <script src="js/words.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/common.js"></script>
   <script src="js/parse.js"></script>
   <script src="js/srs.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/telegram.js"></script>
   <script src="js/sync.js"></script>
   <script src="js/tracker.js"></script>
   <script src="js/games/cards.js"></script>
