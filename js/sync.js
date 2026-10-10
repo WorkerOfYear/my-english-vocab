@@ -1,7 +1,7 @@
 // Sync progress (tracker, hard words, added words) through /api/state so the phone and the computer
 // see the same thing, and so the server can send Telegram reminders. Works only on the deployed site.
 (function (App) {
-  const SYNCED = ["srs", "hard", "custom"];
+  const SYNCED = ["srs", "hard", "custom", "grammar"];
   const online = /^https?:$/.test(location.protocol);
   // Inside the Telegram Mini App the signed launch data replaces the sync key.
   const tgInit = (App.tg && App.tg.initData) || "";
@@ -38,7 +38,7 @@
     return data;
   }
 
-  const local = () => ({ srs: App.store.get("srs", {}), hard: App.hard, custom: App.custom });
+  const local = () => ({ srs: App.store.get("srs", {}), hard: App.hard, custom: App.custom, grammar: App.store.get("grammar", {}) });
   const hasLocalData = () => (App.store.get("srs", {}).groups || []).length > 0 || App.custom.length > 0;
 
   // Union of two devices' progress: a card keeps the version with more reviews.
@@ -59,10 +59,19 @@
     for (const [en, n] of Object.entries(a.hard || {})) hard[en] = Math.max(n, hard[en] || 0);
     const custom = new Map((b.custom || []).map((w) => [App.norm(w.en), w]));
     for (const w of a.custom || []) custom.set(App.norm(w.en), w);
+    // Grammar: the further week wins; per rule, the one practised more recently.
+    const ga = a.grammar || {}, gb = b.grammar || {};
+    const grules = { ...(gb.rules || {}) };
+    for (const [id, r] of Object.entries(ga.rules || {})) {
+      const o = grules[id];
+      if (!o || (r.last || "") > (o.last || "") || ((r.last || "") === (o.last || "") && (r.reviews || 0) > (o.reviews || 0))) grules[id] = r;
+    }
+    const gnewer = (ga.cur || 0) >= (gb.cur || 0) ? ga : gb;
     return {
       srs: { ...sb, ...sa, groups: [...groups.values()].sort((x, y) => x.id - y.id), cards },
       hard,
       custom: [...custom.values()],
+      grammar: { cur: gnewer.cur || 0, weekOf: gnewer.weekOf || "", rules: grules },
     };
   }
 
@@ -72,6 +81,7 @@
       App.store.set("srs", data.srs || {});
       App.store.set("hard", data.hard || {});
       App.store.set("custom", data.custom || []);
+      if (data.grammar) App.store.set("grammar", data.grammar);
     } finally {
       applying = false;
     }
