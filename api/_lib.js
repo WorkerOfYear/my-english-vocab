@@ -4,6 +4,8 @@ const crypto = require("crypto");
 const KEY_STATE = "vocab:state";
 const KEY_OWNER = "vocab:tg_owner"; // chat id of the learner (private chat id == Telegram user id)
 const KEY_LINK = "vocab:tg_link"; // one-time code for t.me/<bot>?start=<code>
+const KEY_CUFF_REMIND = "vocab:cuff_remind"; // "Speak off the cuff" reminder settings
+const cuffDoneKey = (date) => `vocab:cuff_done:${date}`; // a recording was sent that day → no reminder
 
 // ---------- storage: Upstash Redis REST API (Vercel Marketplace → Upstash for Redis)
 // Vercel may add a custom prefix to the variable names (e.g. STORAGE_KV_REST_API_URL), so match by suffix.
@@ -197,7 +199,7 @@ const handle = (fn) => async (req, res) => {
 const query = (req) => new URLSearchParams((req.url || "").split("?")[1] || "");
 
 module.exports = {
-  redis, KEY_LINK, loadState, saveState, ownerId, setOwner,
+  redis, KEY_LINK, KEY_CUFF_REMIND, cuffDoneKey, loadState, saveState, ownerId, setOwner,
   checkSyncKey, checkAuth, verifyInitData, webhookSecret, safeEqual,
   today, dueWords, telegram, siteUrl, appButton, words, reminderText, sendReminder,
   readJson, send, handle, httpError, query,

@@ -1,6 +1,6 @@
 // POST /api/voice?level=C1&cat=...&secs=134&topic=...&q=...   body: the recording (audio/ogg, audio/mp4 or audio/webm)
 // (sync key or Mini App) — sends the "Speak off the cuff" recording to the learner's Telegram chat.
-const { checkAuth, ownerId, send, handle, httpError, query } = require("./_lib");
+const { redis, KEY_CUFF_REMIND, cuffDoneKey, today, checkAuth, ownerId, send, handle, httpError, query } = require("./_lib");
 
 const MAX_BYTES = 4 * 1024 * 1024; // Vercel functions accept request bodies up to 4.5 MB
 
@@ -58,6 +58,12 @@ module.exports = handle(async (req, res) => {
   // The learner may have forbidden voice messages in Telegram's privacy settings — send it as a file then.
   if (!data.ok && ext && /VOICE_MESSAGES_FORBIDDEN/.test(data.description || "")) data = await post(false);
   if (!data.ok) throw httpError(502, "Telegram: " + (data.description || "ошибка"));
+  // Practised today → today's reminder (api/cuff-remind.js) isn't needed. Best effort: the voice is already sent.
+  try {
+    const raw = await redis("GET", KEY_CUFF_REMIND);
+    const tz = (raw && JSON.parse(raw).tz) || undefined;
+    await redis("SET", cuffDoneKey(today(tz)), "1", "EX", 2 * 86400);
+  } catch (e) { /* storage not connected — fine */ }
   send(res, 200, { ok: true });
 });
 

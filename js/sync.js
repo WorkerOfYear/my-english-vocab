@@ -177,6 +177,12 @@
     // Bot: bind it to this learner (returns a one-time t.me link) and check whether it's bound.
     setupBot() { return api("/api/telegram?setup=1", { method: "POST" }); },
     botStatus() { return api("/api/telegram?status=1"); },
+    // "Speak off the cuff" reminder: {enabled, time, days, tz} on the server, plus when the scheduler last called.
+    cuffRemind: {
+      get: () => api("/api/cuff-remind"),
+      save: (settings) => api("/api/cuff-remind", { method: "PUT", body: JSON.stringify(settings) }),
+      test: () => api("/api/cuff-remind?test=1", { method: "POST" }),
+    },
     // "Speak off the cuff": the recording goes to the bot's chat. info: {level, secs, topic, q}
     sendVoice(blob, info) {
       const qs = new URLSearchParams(Object.entries(info).map(([k, v]) => [k, String(v)]));
