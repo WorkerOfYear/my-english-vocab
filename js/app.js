@@ -160,15 +160,31 @@
   };
 
   // ---------- router
+  // A page can have inner screens in the hash (#grammar?rule=x). Then its title and the ← button follow the screen:
+  // page.title / page.parent may be functions of the params; parent is the hash ← leads to ("" = home).
+  App.hashParams = () => new URLSearchParams(location.hash.split("?")[1] || "");
+  App.backHash = () => {
+    const name = (location.hash.slice(1) || "home").split("?")[0];
+    const page = App.pages[name];
+    return page && page.parent ? page.parent(App.hashParams()) : "";
+  };
+
   function route() {
     if (cleanup) { cleanup(); cleanup = null; }
     if ("speechSynthesis" in window) speechSynthesis.cancel();
     const name = (location.hash.slice(1) || "home").split("?")[0];
     const page = App.pages[name] || App.pages.home;
-    document.getElementById("title").textContent = page.title;
-    document.getElementById("back").hidden = page === App.pages.home;
+    const params = App.hashParams();
+    const title = typeof page.title === "function" ? page.title(params) : page.title;
+    const back = document.getElementById("back");
+    const parent = App.backHash();
+    document.getElementById("title").textContent = title;
+    back.hidden = page === App.pages.home;
+    back.href = "#" + parent;
+    back.title = parent ? "Назад" : "На главную";
+    back.setAttribute("aria-label", back.title);
     document.querySelector(".filter-wrap").hidden = !!page.noFilter;
-    document.title = page === App.pages.home ? "Мой английский" : `${page.title} · Мой английский`;
+    document.title = page === App.pages.home ? "Мой английский" : `${title} · Мой английский`;
     const root = document.getElementById("page");
     root.innerHTML = "";
     root.className = `page page-${name}`;
@@ -176,7 +192,7 @@
       root.innerHTML = `<p class="center">Слов пока нет. Запусти <code>python scripts/extract_words.py</code>.</p>`;
       return;
     }
-    cleanup = page.render(root) || null;
+    cleanup = page.render(root, params) || null;
     renderFilter();
   }
   App.route = route;
@@ -193,7 +209,7 @@
     history.replaceState(null, "", location.pathname + (startPage ? "#" + startPage : ""));
   }
 
-  window.addEventListener("hashchange", () => { panelOpen = false; route(); });
+  window.addEventListener("hashchange", () => { panelOpen = false; route(); window.scrollTo(0, 0); });
   document.addEventListener("DOMContentLoaded", () => {
     renderFilter();
     route();

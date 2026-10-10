@@ -40,7 +40,7 @@
     const home = !location.hash || location.hash === "#" || location.hash === "#home";
     home ? tg.BackButton.hide() : tg.BackButton.show();
   };
-  tg.BackButton.onClick(() => { location.hash = ""; });
+  tg.BackButton.onClick(() => { location.hash = App.backHash ? App.backHash() : ""; });
   window.addEventListener("hashchange", syncBack);
   document.addEventListener("DOMContentLoaded", syncBack);
 

@@ -13,7 +13,12 @@
   // rules: id -> {learned, best, bookBest, last, reviews, wrong: {taskKey: n}}
   const defaults = () => ({ cur: 0, weekOf: "", rules: {} });
   const load = () => Object.assign(defaults(), App.store.get("grammar", {}));
-  const save = (g) => App.store.set("grammar", g);
+  // The current rule's id/unit/title go along so the server can name it in the Telegram reminder.
+  const save = (g) => {
+    const r = rules()[g.cur];
+    if (r) Object.assign(g, { curId: r.id, curUnit: r.unit, curTitle: r.title });
+    App.store.set("grammar", g);
+  };
 
   const mondayOf = (iso) => {
     const [y, m, d] = iso.split("-").map(Number);
@@ -24,7 +29,7 @@
   // New week + current rule practised → next rule (one step per week, even after a long break).
   function advance(g) {
     const monday = mondayOf(App.today());
-    if (!g.weekOf) { g.weekOf = monday; save(g); return g; }
+    if (!g.weekOf || g.curId !== (rules()[g.cur] || {}).id) { g.weekOf = g.weekOf || monday; save(g); return g; }
     const cur = rules()[g.cur];
     if (monday > g.weekOf && cur && g.rules[cur.id]?.learned && g.cur < rules().length - 1) {
       g.cur += 1;
@@ -102,11 +107,24 @@
   };
 
   App.pages.grammar = {
-    title: "Грамматика",
+    // Screens: #grammar (list), #grammar?rule=ID[&tab=book], #grammar?practice=ID&mode=app|book, #grammar?review=1.
+    title(p) {
+      const r = byId(p.get("rule") || p.get("practice"));
+      if (r) return `Грамматика · ${r.unit}`;
+      return p.get("review") ? "Грамматика · повторение" : "Грамматика";
+    },
+    // ← goes one level up: exercises → their rule → list of rules → home.
+    parent(p) {
+      if (p.get("practice") && byId(p.get("practice"))) return `grammar?rule=${p.get("practice")}${p.get("mode") === "book" ? "&tab=book" : ""}`;
+      if (p.get("rule") || p.get("review")) return "grammar";
+      return "";
+    },
     noFilter: true,
-    render(root) {
+    render(root, params = new URLSearchParams()) {
       let g = advance(load());
       let view = { name: "home" }; // home | rule {id, tab} | practice {mode, items, k, score, wrong, answered, from}
+      const go = (hash) => { location.hash = hash; }; // the router re-renders the page for the new screen
+      const remind = App.Reminder("grammar", { label: "Напоминать о правиле недели", note: "Если правило недели уже разобрано на этой неделе, бот не напомнит." });
       let onKey = null;
       let bookMsg = "";
 
@@ -162,6 +180,7 @@
             <p class="muted small">${learned.length ? `Пройдено правил: ${learned.length}. ${due.length ? `Пора повторить: ${due.length}.` : "Все повторены недавно."} В тренировку попадают ${ROUND} упражнений: сначала из правил, которые давно не повторял, и те, где были ошибки.` : "Здесь будут смешанные упражнения по пройденным правилам."}</p>
             <button class="btn" id="review" ${learned.length ? "" : "disabled"}>🔁 Смешанная тренировка</button>
           </div>
+          <div class="card"><h3>🔔 Напоминание в Telegram</h3>${remind.html()}</div>
           ${bookCard()}
           <h3 class="section">Все правила</h3>
           <div>
@@ -171,7 +190,8 @@
               ${status(r)}</button>`).join("")}
           </div>`;
         bindCommon();
-        root.querySelector("#review").onclick = () => start("review");
+        root.querySelector("#review").onclick = () => go("grammar?review=1");
+        remind.bind(root, () => { if (view.name === "home") draw(); });
         const next = root.querySelector("#next-now");
         if (next) next.onclick = () => { g.cur += 1; g.weekOf = mondayOf(App.today()); save(g); draw(); };
         root.querySelector("#book-file").onchange = async (e) => {
@@ -190,9 +210,9 @@
       }
 
       function bindCommon() {
-        root.querySelectorAll("[data-rule]").forEach((b) => b.onclick = () => { view = { name: "rule", id: b.dataset.rule, tab: "app" }; draw(); window.scrollTo(0, 0); });
-        root.querySelectorAll("[data-practice]").forEach((b) => b.onclick = () => start("app", b.dataset.practice));
-        root.querySelectorAll("[data-book]").forEach((b) => b.onclick = () => start("book", b.dataset.book));
+        root.querySelectorAll("[data-rule]").forEach((b) => b.onclick = () => go(`grammar?rule=${b.dataset.rule}`));
+        root.querySelectorAll("[data-practice]").forEach((b) => b.onclick = () => go(`grammar?practice=${b.dataset.practice}&mode=app`));
+        root.querySelectorAll("[data-book]").forEach((b) => b.onclick = () => go(`grammar?practice=${b.dataset.book}&mode=book`));
       }
 
       function drawRule() {
@@ -202,7 +222,6 @@
         const bookN = bookTasks(r).length;
         const tab = gb ? view.tab : "app";
         root.innerHTML = `
-          <button class="link" id="to-home">← Все правила</button>
           ${gb ? `<div class="seg grammar-tabs" role="tablist">
             <button data-tab="app" class="${tab === "app" ? "on" : ""}">Объяснение</button>
             <button data-tab="book" class="${tab === "book" ? "on" : ""}">📕 Grammar Bank p. ${esc(gb.page)}</button>
@@ -214,8 +233,11 @@
           </div>
           <button class="btn primary wide" data-practice="${r.id}">✍️ Упражнения приложения (${r.ex.length})</button>
           ${bookN ? `<button class="btn wide" data-book="${r.id}">📕 Упражнения из учебника (${bookN})</button>` : ""}`;
-        root.querySelector("#to-home").onclick = () => { view = { name: "home" }; draw(); };
-        root.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => { view.tab = b.dataset.tab; draw(); });
+        root.querySelectorAll("[data-tab]").forEach((b) => b.onclick = () => {
+          view.tab = b.dataset.tab;
+          history.replaceState(null, "", `#grammar?rule=${r.id}${view.tab === "book" ? "&tab=book" : ""}`);
+          draw();
+        });
         bindCommon();
       }
 
@@ -227,7 +249,6 @@
           : App.shuffle(r.ex.map((e, i) => appTask(r, i)));
         view = { name: "practice", mode, items, k: 0, score: 0, wrong: [], answered: null, from: id || null };
         draw();
-        window.scrollTo(0, 0);
       }
 
       function record(t, ok) {
@@ -258,7 +279,8 @@
         let html = esc(t.q).replace(/\[\[(.+?)\]\]/g, '<span class="fix-phrase">$1</span>');
         if (html.includes("___")) {
           const fill = a ? `<mark class="${a.ok ? "" : "fix"}">${esc(t.kind === "choice" ? rightText(t) : t.answers[0])}</mark>` : '<span class="cloze-gap">______</span>';
-          html = html.replace("___", fill).replace(/___/g, '<span class="cloze-gap">___</span>');
+          // The first gap is this task's; any others (other items of the same text) stay plain blanks.
+          html = html.replace("___", "\u0000").replace(/___/g, '<span class="cloze-gap">___</span>').replace("\u0000", fill);
         }
         return html;
       }
@@ -289,7 +311,7 @@
         const selfCheck = a && a.pending;
         root.innerHTML = `
           <div class="toolbar">
-            <button class="link" id="quit">← Выйти</button>
+            <span class="muted small">${v.k + 1} из ${v.items.length}</span>
             <span class="score">✅ ${v.score} / ${v.k + (a && !selfCheck ? 1 : 0)}</span>
           </div>
           <div class="progress"><div style="width:${(v.k / v.items.length) * 100}%"></div></div>
@@ -305,7 +327,6 @@
               ${t.why ? `<div class="small">${esc(t.why)}</div>` : ""}</div>
             <button class="btn primary wide" id="next">${v.k + 1 < v.items.length ? "Дальше" : "Результат"} <kbd>Enter</kbd></button>` : ""}`;
 
-        root.querySelector("#quit").onclick = () => { view = v.from ? { name: "rule", id: v.from, tab: v.mode === "book" ? "book" : "app" } : { name: "home" }; draw(); };
         const answer = (ok, extra) => {
           v.answered = { ok, ...extra };
           if (ok) v.score++; else v.wrong.push(t);
@@ -369,15 +390,20 @@
             <button class="btn" id="to-home">Все правила</button>
           </div>`;
         root.querySelector("#again").onclick = () => start(v.mode, v.from);
-        if (v.from) root.querySelector("#to-rule").onclick = () => { view = { name: "rule", id: v.from, tab: v.mode === "book" ? "book" : "app" }; draw(); };
-        root.querySelector("#to-home").onclick = () => { view = { name: "home" }; draw(); };
+        if (v.from) root.querySelector("#to-rule").onclick = () => go(`grammar?rule=${v.from}${v.mode === "book" ? "&tab=book" : ""}`);
+        root.querySelector("#to-home").onclick = () => go("grammar");
       }
 
       // Synced progress or the book arriving from the server: re-read when nothing is in progress.
       const onSync = () => { if (view.name !== "practice") { g = advance(load()); draw(); } };
       document.addEventListener("sync-status", onSync);
       document.addEventListener("book-loaded", onSync);
-      draw();
+      // Which screen the hash asks for.
+      const ruleId = params.get("rule"), practiceId = params.get("practice");
+      if (ruleId && byId(ruleId)) view = { name: "rule", id: ruleId, tab: params.get("tab") === "book" ? "book" : "app" };
+      if (practiceId && byId(practiceId)) start(params.get("mode") === "book" && bookTasks(byId(practiceId)).length ? "book" : "app", practiceId);
+      else if (params.get("review") && rules().some((r) => g.rules[r.id]?.learned)) start("review");
+      else { draw(); remind.load(() => { if (view.name === "home") draw(); }); }
       return () => {
         if (onKey) document.removeEventListener("keydown", onKey);
         document.removeEventListener("sync-status", onSync);

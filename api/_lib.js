@@ -161,12 +161,40 @@ function reminderText(due, { test = false } = {}) {
   return `${test ? "✅ Бот подключён.\n\n" : ""}🗓️ Пора повторить ${words(n)}\n\n${list}`;
 }
 
+// ---------- a meme "Jason Statham quote" at the end of every reminder (api/_quotes.json: [text, has swearing])
+const KEY_QUOTES = "vocab:quotes"; // settings {enabled, mat}
+const KEY_QUOTES_USED = "vocab:quotes_used"; // quotes already sent in this lap — no repeats until all have been used
+
+async function quoteSettings() {
+  const raw = await redis("GET", KEY_QUOTES);
+  return Object.assign({ enabled: true, mat: true }, raw ? JSON.parse(raw) : {});
+}
+const saveQuoteSettings = (s) => redis("SET", KEY_QUOTES, JSON.stringify({ enabled: !!s.enabled, mat: !!s.mat }));
+
+// "\n\n💬 «…»" or "" — never fails the reminder itself.
+async function quoteLine() {
+  try {
+    const s = await quoteSettings();
+    if (!s.enabled) return "";
+    const all = require("./_quotes.json").quotes;
+    const pool = all.map((q, i) => i).filter((i) => s.mat || !all[i][1]);
+    let used = JSON.parse((await redis("GET", KEY_QUOTES_USED)) || "[]");
+    let fresh = pool.filter((i) => !used.includes(i));
+    if (!fresh.length) { used = []; fresh = pool; }
+    const i = fresh[Math.floor(Math.random() * fresh.length)];
+    await redis("SET", KEY_QUOTES_USED, JSON.stringify([...used, i]));
+    return `\n\n💬 «${all[i][0]}»\n— Джейсон Стэтхэм`;
+  } catch (e) {
+    return "";
+  }
+}
+
 async function sendReminder(req, due, opts) {
   const text = reminderText(due, opts);
   if (!text) return { sent: false, due: 0 };
   await telegram("sendMessage", {
     chat_id: await chatId(),
-    text,
+    text: text + (await quoteLine()),
     reply_markup: { inline_keyboard: [[due.length ? appButton(req, "▶️ Начать повторение", "review") : appButton(req, "📚 Открыть", "")]] },
   });
   return { sent: true, due: due.length };
@@ -201,6 +229,6 @@ const query = (req) => new URLSearchParams((req.url || "").split("?")[1] || "");
 module.exports = {
   redis, KEY_LINK, KEY_CUFF_REMIND, cuffDoneKey, loadState, saveState, ownerId, setOwner,
   checkSyncKey, checkAuth, verifyInitData, webhookSecret, safeEqual,
-  today, dueWords, telegram, siteUrl, appButton, words, reminderText, sendReminder,
+  today, dueWords, telegram, quoteLine, quoteSettings, saveQuoteSettings, siteUrl, appButton, words, reminderText, sendReminder,
   readJson, send, handle, httpError, query,
 };

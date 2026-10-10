@@ -71,7 +71,7 @@
       srs: { ...sb, ...sa, groups: [...groups.values()].sort((x, y) => x.id - y.id), cards },
       hard,
       custom: [...custom.values()],
-      grammar: { cur: gnewer.cur || 0, weekOf: gnewer.weekOf || "", rules: grules },
+      grammar: { ...gnewer, cur: gnewer.cur || 0, weekOf: gnewer.weekOf || "", rules: grules },
     };
   }
 
@@ -179,19 +179,19 @@
       emit();
     },
     deviceLink() { return `${location.origin}${location.pathname}#sync=${encodeURIComponent(meta.key)}`; },
-    async test() {
-      await run(pushNow); // the server should see the latest schedule
-      if (meta.error) throw new Error(meta.error);
-      return api("/api/remind?test=1", { method: "POST" });
-    },
     // Bot: bind it to this learner (returns a one-time t.me link) and check whether it's bound.
     setupBot() { return api("/api/telegram?setup=1", { method: "POST" }); },
     botStatus() { return api("/api/telegram?status=1"); },
-    // "Speak off the cuff" reminder: {enabled, time, days, tz} on the server, plus when the scheduler last called.
-    cuffRemind: {
-      get: () => api("/api/cuff-remind"),
-      save: (settings) => api("/api/cuff-remind", { method: "PUT", body: JSON.stringify(settings) }),
-      test: () => api("/api/cuff-remind?test=1", { method: "POST" }),
+    // Telegram reminders (words / grammar / cuff): {enabled, time, days, tz} on the server, plus when the scheduler last called.
+    reminders: {
+      get: (kind) => api(`/api/reminders?kind=${kind}`),
+      save: (kind, settings) => api(`/api/reminders?kind=${kind}`, { method: "PUT", body: JSON.stringify(settings) }),
+      test: (kind) => api(`/api/reminders?kind=${kind}&test=1`, { method: "POST" }),
+    },
+    // Meme Statham quote at the end of every reminder: {enabled, mat}.
+    quotes: {
+      get: () => api("/api/reminders?quotes=1"),
+      save: (q) => api("/api/reminders?quotes=1", { method: "PUT", body: JSON.stringify(q) }),
     },
     // Course book material, private to the learner (api/book.js).
     bookGet: () => api("/api/book"),
