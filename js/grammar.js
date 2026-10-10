@@ -107,16 +107,18 @@
   };
 
   App.pages.grammar = {
-    // Screens: #grammar (list), #grammar?rule=ID[&tab=book], #grammar?practice=ID&mode=app|book, #grammar?review=1.
+    // Screens: #grammar (list), #grammar?rule=ID[&tab=book], #grammar?practice=ID&mode=app|book, #grammar?review=1,
+    // #grammar?settings=1 (course book + reminder).
     title(p) {
       const r = byId(p.get("rule") || p.get("practice"));
       if (r) return `Грамматика · ${r.unit}`;
+      if (p.get("settings")) return "Грамматика · настройки";
       return p.get("review") ? "Грамматика · повторение" : "Грамматика";
     },
     // ← goes one level up: exercises → their rule → list of rules → home.
     parent(p) {
       if (p.get("practice") && byId(p.get("practice"))) return `grammar?rule=${p.get("practice")}${p.get("mode") === "book" ? "&tab=book" : ""}`;
-      if (p.get("rule") || p.get("review")) return "grammar";
+      if (p.get("rule") || p.get("review") || p.get("settings")) return "grammar";
       return "";
     },
     noFilter: true,
@@ -132,6 +134,7 @@
         if (onKey) { document.removeEventListener("keydown", onKey); onKey = null; }
         if (view.name === "rule") return drawRule();
         if (view.name === "practice") return drawPractice();
+        if (view.name === "settings") return drawSettings();
         drawHome();
       }
 
@@ -162,6 +165,10 @@
         const last = g.cur === all.length - 1;
         const bookN = bookTasks(cur).length;
         root.innerHTML = `
+          <div class="toolbar">
+            <span class="muted small">Пройдено правил: ${learned.length} из ${all.length}${App.book.loaded ? " · 📕 учебник загружен" : ""}</span>
+            <button class="icon-btn" id="g-settings" title="Учебник и напоминание" aria-label="Настройки">⚙️</button>
+          </div>
           <div class="card accent">
             <div class="muted small">Правило недели · Unit ${esc(cur.unit)}</div>
             <div class="big">${esc(cur.title)}</div>
@@ -180,8 +187,6 @@
             <p class="muted small">${learned.length ? `Пройдено правил: ${learned.length}. ${due.length ? `Пора повторить: ${due.length}.` : "Все повторены недавно."} В тренировку попадают ${ROUND} упражнений: сначала из правил, которые давно не повторял, и те, где были ошибки.` : "Здесь будут смешанные упражнения по пройденным правилам."}</p>
             <button class="btn" id="review" ${learned.length ? "" : "disabled"}>🔁 Смешанная тренировка</button>
           </div>
-          <div class="card"><h3>🔔 Напоминание в Telegram</h3>${remind.html()}</div>
-          ${bookCard()}
           <h3 class="section">Все правила</h3>
           <div>
             ${all.map((r, i) => `<button class="option grammar-item${i === g.cur ? " current" : ""}" data-rule="${r.id}">
@@ -191,9 +196,16 @@
           </div>`;
         bindCommon();
         root.querySelector("#review").onclick = () => go("grammar?review=1");
-        remind.bind(root, () => { if (view.name === "home") draw(); });
+        root.querySelector("#g-settings").onclick = () => go("grammar?settings=1");
         const next = root.querySelector("#next-now");
         if (next) next.onclick = () => { g.cur += 1; g.weekOf = mondayOf(App.today()); save(g); draw(); };
+      }
+
+      function drawSettings() {
+        root.innerHTML = `
+          <div class="card"><h3>🔔 Напоминание в Telegram</h3>${remind.html()}</div>
+          ${bookCard()}`;
+        remind.bind(root, () => { if (view.name === "settings") draw(); });
         root.querySelector("#book-file").onchange = async (e) => {
           const file = e.target.files[0];
           if (!file) return;
@@ -403,7 +415,8 @@
       if (ruleId && byId(ruleId)) view = { name: "rule", id: ruleId, tab: params.get("tab") === "book" ? "book" : "app" };
       if (practiceId && byId(practiceId)) start(params.get("mode") === "book" && bookTasks(byId(practiceId)).length ? "book" : "app", practiceId);
       else if (params.get("review") && rules().some((r) => g.rules[r.id]?.learned)) start("review");
-      else { draw(); remind.load(() => { if (view.name === "home") draw(); }); }
+      else if (params.get("settings")) { view = { name: "settings" }; draw(); remind.load(() => { if (view.name === "settings") draw(); }); }
+      else draw();
       return () => {
         if (onKey) document.removeEventListener("keydown", onKey);
         document.removeEventListener("sync-status", onSync);
