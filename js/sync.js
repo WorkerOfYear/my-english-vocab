@@ -193,6 +193,9 @@
       save: (settings) => api("/api/cuff-remind", { method: "PUT", body: JSON.stringify(settings) }),
       test: () => api("/api/cuff-remind?test=1", { method: "POST" }),
     },
+    // Course book material, private to the learner (api/book.js).
+    bookGet: () => api("/api/book"),
+    bookPut: (book) => api("/api/book", { method: "PUT", body: JSON.stringify(book) }),
     // "Speak off the cuff": the recording goes to the bot's chat. info: {level, secs, topic, q}
     sendVoice(blob, info) {
       const qs = new URLSearchParams(Object.entries(info).map(([k, v]) => [k, String(v)]));

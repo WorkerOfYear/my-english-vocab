@@ -5,3 +5,8 @@ ChatExport_*/
 __pycache__/
 .DS_Store
 Thumbs.db
+
+# Course book material (copyrighted) — loaded into the app privately, never committed
+book.json
+*.book.json
+data/book/

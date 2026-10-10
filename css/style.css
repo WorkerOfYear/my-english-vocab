@@ -325,6 +325,20 @@ code { font-size: .85em; background: var(--surface-2); border-radius: 4px; paddi
 .grammar-rule .ex { display: inline; font-style: italic; color: var(--accent); }
 .cloze-sentence mark.fix { background: var(--bad-soft); color: var(--bad); }
 #gap-form .answer { flex: 1; }
+#gap-form .lead { width: 100%; color: var(--muted); }
+.grammar-tabs { margin: 10px 0; display: flex; }
+.grammar-tabs button { flex: 1; }
+.task-head { font-size: .85rem; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+.task-head.muted { color: var(--muted); font-weight: 400; }
+.fix-phrase { background: var(--accent-soft); color: var(--accent); font-weight: 600; border-radius: 4px; padding: 0 3px; }
+.book-text h4 { margin: 16px 0 6px; }
+.book-text .ex-box { background: var(--surface-2); border-radius: 8px; padding: 8px 12px; margin: 6px 0; }
+.book-text .ex-box p { margin: 3px 0; }
+.book-text ol { padding-left: 20px; }
+.book-text .dm-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.book-text .dm-table td, .book-text .dm-table th { border-top: 1px solid var(--border); padding: 6px 4px; vertical-align: top; text-align: left; }
+.book-text .dm-table td:first-child { width: 55%; }
+.book-text .warn { border-left: 3px solid var(--bad); padding-left: 10px; margin: 8px 0; }
 
 /* touch screens: keyboard shortcut hints are noise */
 @media (hover: none) and (pointer: coarse) { kbd { display: none; } }
