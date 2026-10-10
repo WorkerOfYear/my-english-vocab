@@ -1,5 +1,6 @@
 // Speak off the cuff: spin the wheel for a topic, talk about it (2 minutes is the target, stop whenever you like),
-// the recording goes to the Telegram bot. Topics don't repeat until every topic of the level has come up.
+// the recording goes to the Telegram bot. Topics don't repeat until every topic of the chosen level and
+// categories has come up. ⚙️ opens the settings: level and topic categories.
 (function (App) {
   const { esc } = App;
   const LEVELS = ["B2", "C1", "C2"];
@@ -8,10 +9,17 @@
   const COLORS = ["var(--s1)", "var(--s2)", "var(--s3)", "var(--s4)", "var(--s5)", "var(--s0)"];
   const MAX_BYTES = 4 * 1024 * 1024; // what /api/voice accepts
 
+  const CATS = new Map((window.CUFF_CATEGORIES || []).map(([id, icon, name]) => [id, { icon, name }]));
+
   const load = () => {
     const s = App.store.get("cuff", {});
-    return { level: LEVELS.includes(s.level) ? s.level : "C1", used: s.used || {} };
+    return {
+      level: LEVELS.includes(s.level) ? s.level : "C1",
+      cats: (s.cats || []).filter((c) => CATS.has(c)), // empty = all categories
+      used: s.used || {},
+    };
   };
+  const catLabel = (c) => (CATS.has(c) ? `${CATS.get(c).icon} ${CATS.get(c).name}` : "");
   const mmss = (secs) => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
   const short = (t) => (t.length > 17 ? t.slice(0, 16) + "…" : t);
 
@@ -41,8 +49,10 @@
       let lapNote = "";
       let rec = null; // { recorder, stream, chunks, started, timer, wake }
       let result = null; // { blob, url, secs, status: "sending" | "sent" | "error" | "local", error }
+      let settings = null; // open settings panel: { before } — the level/categories it was opened with
 
-      const topics = () => window.CUFF_TOPICS[state.level];
+      const levelTopics = () => window.CUFF_TOPICS[state.level];
+      const topics = () => levelTopics().filter((t) => !state.cats.length || state.cats.includes(t.c));
       const usedSet = () => new Set(state.used[state.level] || []);
       const unused = () => { const u = usedSet(); return topics().filter((t) => !u.has(t.id)); };
 
@@ -62,7 +72,8 @@
         const u = usedSet();
         const segs = wheel.map((t, i) => {
           const a0 = i * step, a1 = a0 + step, mid = a0 + step / 2;
-          return `<path d="M${r} ${r} L${pt(a0, r)} A${r} ${r} 0 0 1 ${pt(a1, r)} Z" fill="${COLORS[i % COLORS.length]}"${u.has(t.id) && phase === "wheel" ? ' opacity=".45"' : ""}/>
+          const shape = n === 1 ? `<circle cx="${r}" cy="${r}" r="${r}"` : `<path d="M${r} ${r} L${pt(a0, r)} A${r} ${r} 0 0 1 ${pt(a1, r)} Z"`;
+          return `${shape} fill="${COLORS[i % COLORS.length]}"${u.has(t.id) && phase === "wheel" ? ' opacity=".45"' : ""}/>
             <text transform="rotate(${mid - 90} ${r} ${r})" x="${2 * r - 12}" y="${r}" text-anchor="end" dominant-baseline="central">${esc(short(t.t))}</text>`;
         }).join("");
         return `<div class="wheel-wrap">
@@ -74,7 +85,7 @@
 
       function topicCard() {
         return `<div class="card cuff-topic">
-          <div class="muted small">${state.level} · topic</div>
+          <div class="muted small">${state.level} · ${esc(catLabel(topic.c))}</div>
           <div class="big">${esc(topic.t)}</div>
           <p class="cuff-q">${esc(topic.q)}</p>
           ${topic.ideas && topic.ideas.length ? `<div class="row chips">${topic.ideas.map((x) => `<span class="chip">${esc(x)}</span>`).join("")}</div>` : ""}
@@ -83,13 +94,16 @@
 
       function draw() {
         const left = unused().length, total = topics().length;
+        const cats = state.cats.length === 1 ? catLabel(state.cats[0]) : state.cats.length ? `${state.cats.length} категории` : "все темы";
         const head = `
           <div class="toolbar">
-            <div class="seg" role="group" aria-label="Уровень">${LEVELS.map((l) => `<button data-level="${l}" class="${l === state.level ? "on" : ""}" ${["wheel", "topic"].includes(phase) ? "" : "disabled"}>${l}</button>`).join("")}</div>
-            <span class="muted small">новых тем: ${left} из ${total}</span>
+            <span class="cuff-summary"><b>${state.level}</b> · ${esc(cats)}<br><span class="muted small">новых тем: ${left} из ${total}</span></span>
+            <button class="icon-btn" id="settings" title="Настройки" aria-label="Настройки" ${["wheel", "topic"].includes(phase) ? "" : "disabled"}>⚙️</button>
           </div>`;
 
-        if (phase === "wheel" || phase === "spinning" || phase === "topic") {
+        if (settings) {
+          root.innerHTML = `${head}${settingsPanel()}`;
+        } else if (phase === "wheel" || phase === "spinning" || phase === "topic") {
           root.innerHTML = `${head}
             ${wheelSvg()}
             ${lapNote ? `<p class="note center">${esc(lapNote)}</p>` : ""}
@@ -132,18 +146,62 @@
         bind();
       }
 
+      function settingsPanel() {
+        const all = levelTopics();
+        const count = (c) => all.filter((t) => t.c === c).length;
+        const u = usedSet();
+        const fresh = topics().filter((t) => !u.has(t.id)).length;
+        return `<div class="card cuff-settings">
+          <h3>Уровень</h3>
+          <div class="seg" role="group" aria-label="Уровень">${LEVELS.map((l) => `<button data-level="${l}" class="${l === state.level ? "on" : ""}">${l}</button>`).join("")}</div>
+          <h3 class="section">Категории тем</h3>
+          <div class="row chips">
+            <button class="chip${state.cats.length ? "" : " on"}" data-cat="">Все темы · ${all.length}</button>
+            ${[...CATS].map(([id, c]) => `<button class="chip${state.cats.includes(id) ? " on" : ""}" data-cat="${id}">${c.icon} ${esc(c.name)} · ${count(id)}</button>`).join("")}
+          </div>
+          <p class="panel-count">В выборке <b>${topics().length}</b> тем, из них новых <b>${fresh}</b></p>
+          <div class="row">
+            <button class="btn primary" id="settings-done">Готово</button>
+            <button class="btn" id="reset-used" ${u.size ? "" : "disabled"}>↺ Сбросить историю ${state.level}</button>
+          </div>
+        </div>`;
+      }
+
+      function closeSettings() {
+        const changed = settings.before !== state.level + "|" + state.cats.join();
+        settings = null;
+        if (changed || phase !== "topic") { phase = "wheel"; topic = null; lapNote = ""; fillWheel(); }
+        draw();
+      }
+
       function bind() {
         const $ = (s) => root.querySelector(s);
+        if ($("#settings")) $("#settings").onclick = () => {
+          if (settings) return closeSettings();
+          settings = { before: state.level + "|" + state.cats.join() };
+          draw();
+        };
         root.querySelectorAll("[data-level]").forEach((b) => b.onclick = () => {
-          if (state.level === b.dataset.level) return;
           state.level = b.dataset.level;
           save();
-          phase = "wheel";
-          topic = null;
-          lapNote = "";
-          fillWheel();
           draw();
         });
+        // "All" on → a tap picks just that category; otherwise taps toggle, and nothing left means all again.
+        root.querySelectorAll("[data-cat]").forEach((b) => b.onclick = () => {
+          const c = b.dataset.cat;
+          if (!c) state.cats = [];
+          else if (state.cats.includes(c)) state.cats = state.cats.filter((x) => x !== c);
+          else state.cats = [...state.cats, c];
+          save();
+          draw();
+        });
+        if ($("#settings-done")) $("#settings-done").onclick = closeSettings;
+        if ($("#reset-used")) $("#reset-used").onclick = async () => {
+          if (!(await App.confirm(`Снова считать новыми все темы уровня ${state.level}?`))) return;
+          state.used[state.level] = [];
+          save();
+          draw();
+        };
         if ($("#spin")) $("#spin").onclick = spin;
         if ($("#start")) $("#start").onclick = startRec;
         if ($("#stop")) $("#stop").onclick = stopRec;
@@ -154,10 +212,11 @@
       function spin() {
         if (phase === "spinning") return;
         lapNote = "";
-        if (!unused().length) { // everything has come up — start a new lap
-          state.used[state.level] = [];
+        if (!unused().length) { // everything in this selection has come up — start a new lap
+          const pool = new Set(topics().map((t) => t.id));
+          state.used[state.level] = (state.used[state.level] || []).filter((id) => !pool.has(id));
           save();
-          lapNote = "Все темы этого уровня уже были — начинаем круг заново.";
+          lapNote = "Все темы из выборки уже были — начинаем круг заново.";
         }
         fillWheel();
         const u = usedSet();
@@ -268,7 +327,7 @@
         r.status = "sending";
         draw();
         try {
-          await App.sync.sendVoice(r.blob, { level: state.level, secs: r.secs, topic: topic.t, q: topic.q });
+          await App.sync.sendVoice(r.blob, { level: state.level, cat: catLabel(topic.c), secs: r.secs, topic: topic.t, q: topic.q });
           r.status = "sent";
         } catch (e) {
           r.status = "error";

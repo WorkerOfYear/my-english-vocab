@@ -1,4 +1,4 @@
-// POST /api/voice?level=C1&secs=134&topic=...&q=...   body: the recording (audio/ogg, audio/mp4 or audio/webm)
+// POST /api/voice?level=C1&cat=...&secs=134&topic=...&q=...   body: the recording (audio/ogg, audio/mp4 or audio/webm)
 // (sync key or Mini App) — sends the "Speak off the cuff" recording to the learner's Telegram chat.
 const { checkAuth, ownerId, send, handle, httpError, query } = require("./_lib");
 
@@ -34,7 +34,7 @@ module.exports = handle(async (req, res) => {
   const q = query(req);
   const secs = Math.max(0, Math.round(Number(q.get("secs")) || 0));
   const caption = [
-    `🎙️ Speak off the cuff · ${clip(q.get("level"), 4)} · ${mmss(secs)}`,
+    ["🎙️ Speak off the cuff", clip(q.get("level"), 4), clip(q.get("cat"), 40), mmss(secs)].filter(Boolean).map(esc).join(" · "),
     "",
     `<b>${esc(clip(q.get("topic"), 100))}</b>`,
     esc(clip(q.get("q"), 400)),
