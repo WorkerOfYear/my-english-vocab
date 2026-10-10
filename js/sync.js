@@ -177,6 +177,11 @@
     // Bot: bind it to this learner (returns a one-time t.me link) and check whether it's bound.
     setupBot() { return api("/api/telegram?setup=1", { method: "POST" }); },
     botStatus() { return api("/api/telegram?status=1"); },
+    // "Speak off the cuff": the recording goes to the bot's chat. info: {level, secs, topic, q}
+    sendVoice(blob, info) {
+      const qs = new URLSearchParams(Object.entries(info).map(([k, v]) => [k, String(v)]));
+      return api(`/api/voice?${qs}`, { method: "POST", body: blob, headers: { "Content-Type": blob.type || "application/octet-stream" } });
+    },
     pull,
   };
 
