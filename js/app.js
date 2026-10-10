@@ -101,6 +101,8 @@
         ["hangman", "🪢", "Виселица", "Угадай слово по буквам"],
         ["listen", "🎧", "Аудирование", "Послушай и напиши"],
         ["cloze", "🧩", "Вставь слово", "Слово пропущено в предложении"],
+        ["cuff", "🎙️", "Speak off the cuff", "Тема на рулетке и 2 минуты речи"],
+        ["grammar", "📘", "Грамматика", App.grammarSummary ? App.grammarSummary() : "Правило недели"],
         ["words", "📖", "Словарь", "Все слова с поиском"],
         ["add", "➕", "Добавить слова", "Вставь новые слова с урока"],
       ];
@@ -165,6 +167,7 @@
     const page = App.pages[name] || App.pages.home;
     document.getElementById("title").textContent = page.title;
     document.getElementById("back").hidden = page === App.pages.home;
+    document.querySelector(".filter-wrap").hidden = !!page.noFilter;
     document.title = page === App.pages.home ? "Мой английский" : `${page.title} · Мой английский`;
     const root = document.getElementById("page");
     root.innerHTML = "";
