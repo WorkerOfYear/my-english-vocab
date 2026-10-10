@@ -53,6 +53,11 @@
   App.pages.tracker = {
     title: "Трекер повторений",
     render(root) {
+      const remind = App.Reminder("words", {
+        label: "Напоминать о словах к повторению",
+        note: (r) => "Бот пишет, только если есть слова к повторению." + (r.saved ? "" : " Пока ты не поменяешь настройки, напоминание приходит раз в день около 19:00–20:00 по Новосибирску."),
+      });
+      let remindLoaded = false;
       function draw() {
         const due = srs.dueWords();
         const active = srs.activeGroups();
@@ -148,8 +153,8 @@
         if (sync.viaTelegram) {
           return `${head}<p class="small">✅ Вход через Telegram — прогресс общий с сайтом.</p>
             <p class="small" id="sync-status">${esc(sync.status())}</p>
-            <div class="row"><button class="btn" id="sync-test">📨 Прислать напоминание сейчас</button></div>
-            <p class="small" id="sync-msg"></p></div>`;
+            <p class="small" id="sync-msg"></p>
+            ${wordsRemind()}</div>`;
         }
         if (!sync.connected) {
           return `${head}<p class="muted small">Прогресс будет одинаковым на телефоне и компьютере, а бот в Telegram будет присылать
@@ -164,14 +169,18 @@
           <p class="small" id="bot-status">🤖 Проверяю бота…</p>
           <div class="row">
             <button class="btn" id="bot-setup">🤖 Подключить бота</button>
-            <button class="btn" id="sync-test">📨 Проверить Telegram</button>
             <button class="btn" id="sync-link">📱 Подключить телефон</button>
             <button class="btn danger" id="sync-off">Отключить</button>
           </div>
-          <p class="small" id="sync-msg"></p></div>`;
+          <p class="small" id="sync-msg"></p>
+          ${wordsRemind()}</div>`;
       }
 
+      const wordsRemind = () => `<h3 class="section">🔔 Когда напоминать о словах</h3>${remind.html()}`;
+
       function bindSync() {
+        remind.bind(root, draw);
+        if (!remindLoaded && App.sync.connected) { remindLoaded = true; remind.load(draw); }
         const $ = (sel) => root.querySelector(sel);
         const msg = (html) => { const el = $("#sync-msg"); if (el) el.innerHTML = html; };
         const form = $("#sync-form");
@@ -199,14 +208,6 @@
             const r = await App.sync.setupBot();
             msg(`Открой ссылку и нажми <b>Start</b> — бот запомнит тебя (ссылка работает час):<br>
               <a class="btn primary" href="${esc(r.link)}" target="_blank" rel="noopener" style="margin-top:8px">Открыть @${esc(r.bot)} в Telegram</a>`);
-          } catch (err) { msg("⚠️ " + esc(err.message)); }
-        };
-        const test = $("#sync-test");
-        if (test) test.onclick = async () => {
-          msg("⏳ Отправляю…");
-          try {
-            const r = await App.sync.test();
-            msg(r.sent ? "✅ Сообщение отправлено — проверь Telegram" : "Отправлено");
           } catch (err) { msg("⚠️ " + esc(err.message)); }
         };
         const link = $("#sync-link");

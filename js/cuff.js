@@ -19,12 +19,6 @@
       used: s.used || {},
     };
   };
-  const DAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]; // ISO weekdays 1..7
-  const myTz = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) { return ""; } };
-  const ago = (ms) => {
-    const min = Math.round((Date.now() - ms) / 60000);
-    return min < 1 ? "только что" : min < 60 ? `${min} мин назад` : min < 48 * 60 ? `${Math.round(min / 60)} ч назад` : `${Math.round(min / 1440)} дн назад`;
-  };
   const catLabel = (c) => (CATS.has(c) ? `${CATS.get(c).icon} ${CATS.get(c).name}` : "");
   const mmss = (secs) => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
   const short = (t) => (t.length > 17 ? t.slice(0, 16) + "…" : t);
@@ -56,9 +50,7 @@
       let rec = null; // { recorder, stream, chunks, started, timer, wake }
       let result = null; // { blob, url, secs, status: "sending" | "sent" | "error" | "local", error }
       let settings = null; // open settings panel: { before } — the level/categories it was opened with
-      // Reminder settings live on the server (the scheduler reads them there): { data, lastTick, cronSecret, msg, busy }
-      let remind = { data: App.store.get("cuffRemind", null), lastTick: 0, cronSecret: true, msg: "", loaded: false };
-      let saveTimer = null;
+      const remind = App.Reminder("cuff", { label: "Напоминать потренироваться", note: "Если в этот день ты уже отправил запись, бот не напомнит." });
 
       const levelTopics = () => window.CUFF_TOPICS[state.level];
       const topics = () => levelTopics().filter((t) => !state.cats.length || state.cats.includes(t.c));
@@ -177,66 +169,7 @@
         </div>`;
       }
 
-      function remindSection() {
-        const head = '<h3 class="section">🔔 Напоминание в Telegram</h3>';
-        if (!App.sync || !App.sync.connected) {
-          return `${head}<p class="muted small">Чтобы бот напоминал о практике, подключи синхронизацию и бота в трекере (☁️ Синхронизация и Telegram).</p>`;
-        }
-        if (!remind.data) return `${head}<p class="muted small">${remind.msg ? esc(remind.msg) : "⏳ Загружаю…"}</p>`;
-        const r = remind.data;
-        let scheduler = "";
-        if (r.enabled && remind.loaded) {
-          if (!remind.cronSecret) scheduler = "⚠️ На сервере не задан CRON_SECRET: без него планировщик не запустится. Как настроить, написано в README.";
-          else if (!remind.lastTick) scheduler = "⚠️ Планировщик ещё ни разу не срабатывал. Настрой cron-job.org по инструкции в README, иначе напоминание не придёт.";
-          else if (Date.now() - remind.lastTick > 3 * 3600 * 1000) scheduler = `⚠️ Планировщик давно молчит (последний сигнал ${ago(remind.lastTick)}). Проверь задачу на cron-job.org.`;
-          else scheduler = `✓ Планировщик работает, последний сигнал ${ago(remind.lastTick)}.`;
-        }
-        return `${head}
-          <label class="row check"><input type="checkbox" id="rm-on" ${r.enabled ? "checked" : ""}> Напоминать потренироваться</label>
-          <div class="cuff-remind${r.enabled ? "" : " off"}">
-            <div class="row"><label>Во сколько <input type="time" id="rm-time" value="${esc(r.time)}" ${r.enabled ? "" : "disabled"}></label></div>
-            <div class="row chips" role="group" aria-label="Дни недели">
-              ${DAYS.map((d, i) => `<button class="chip${r.days.includes(i + 1) ? " on" : ""}" data-day="${i + 1}" ${r.enabled ? "" : "disabled"}>${d}</button>`).join("")}
-            </div>
-            <p class="muted small">Время по часовому поясу ${esc(r.tz)}. Если в этот день ты уже отправил запись, бот не напомнит.</p>
-            ${scheduler ? `<p class="small">${esc(scheduler)}</p>` : ""}
-          </div>
-          <div class="row">
-            <button class="btn small" id="rm-test">📨 Прислать напоминание сейчас</button>
-          </div>
-          ${remind.msg ? `<p class="small">${esc(remind.msg)}</p>` : ""}`;
-      }
-
-      async function loadRemind() {
-        if (!App.sync || !App.sync.connected) return;
-        try {
-          const r = await App.sync.cuffRemind.get();
-          remind = { ...remind, data: r.settings, lastTick: r.lastTick, cronSecret: r.cronSecret, msg: "", loaded: true };
-          App.store.set("cuffRemind", r.settings);
-        } catch (e) {
-          remind.msg = "⚠️ " + e.message;
-        }
-        if (settings) draw();
-      }
-
-      // Each change goes to the server shortly after the last tap.
-      function changeRemind(patch) {
-        Object.assign(remind.data, patch, { tz: myTz() || remind.data.tz });
-        App.store.set("cuffRemind", remind.data);
-        remind.msg = "⏳ Сохраняю…";
-        draw();
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(async () => {
-          try {
-            const r = await App.sync.cuffRemind.save(remind.data);
-            remind.data = r.settings;
-            remind.msg = "✓ Сохранено";
-          } catch (e) {
-            remind.msg = "⚠️ " + e.message;
-          }
-          if (settings) draw();
-        }, 700);
-      }
+      const remindSection = () => `<h3 class="section">🔔 Напоминание в Telegram</h3>${remind.html()}`;
 
       function closeSettings() {
         const changed = settings.before !== state.level + "|" + state.cats.join();
@@ -250,9 +183,8 @@
         if ($("#settings")) $("#settings").onclick = () => {
           if (settings) return closeSettings();
           settings = { before: state.level + "|" + state.cats.join() };
-          remind.msg = "";
           draw();
-          loadRemind();
+          remind.load(() => { if (settings) draw(); });
         };
         root.querySelectorAll("[data-level]").forEach((b) => b.onclick = () => {
           state.level = b.dataset.level;
@@ -269,19 +201,7 @@
           draw();
         });
         if ($("#settings-done")) $("#settings-done").onclick = closeSettings;
-        if ($("#rm-on")) $("#rm-on").onchange = (e) => changeRemind({ enabled: e.target.checked });
-        if ($("#rm-time")) $("#rm-time").onchange = (e) => { if (e.target.value) changeRemind({ time: e.target.value }); };
-        root.querySelectorAll("[data-day]").forEach((b) => b.onclick = () => {
-          const d = +b.dataset.day, days = remind.data.days;
-          const next = days.includes(d) ? days.filter((x) => x !== d) : [...days, d].sort();
-          if (next.length) changeRemind({ days: next });
-        });
-        if ($("#rm-test")) $("#rm-test").onclick = async () => {
-          remind.msg = "⏳ Отправляю…";
-          draw();
-          try { await App.sync.cuffRemind.test(); remind.msg = "✅ Отправлено, проверь Telegram"; } catch (e) { remind.msg = "⚠️ " + e.message; }
-          if (settings) draw();
-        };
+        remind.bind(root, () => { if (settings) draw(); });
         if ($("#reset-used")) $("#reset-used").onclick = async () => {
           if (!(await App.confirm(`Снова считать новыми все темы уровня ${state.level}?`))) return;
           state.used[state.level] = [];
