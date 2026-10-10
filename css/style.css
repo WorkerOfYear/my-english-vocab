@@ -87,7 +87,8 @@ input[type=date], select {
   font: inherit; color: var(--text); background: var(--surface-2);
   border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px;
 }
-.check { gap: 6px; font-size: .95rem; }
+.check { gap: 6px; font-size: .95rem; flex-wrap: nowrap; align-items: flex-start; }
+.check input { margin-top: 4px; flex: none; }
 .chip {
   font: inherit; font-size: .9rem; border: 1px solid var(--border); background: var(--surface-2);
   color: var(--text); padding: 4px 10px; border-radius: 999px; cursor: pointer;

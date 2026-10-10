@@ -6,13 +6,14 @@
 //   GET  /api/reminders?kind=words        — (sync key or Mini App) settings + when the scheduler last called
 //   PUT  /api/reminders?kind=words        — (sync key or Mini App) body {enabled, time: "19:30", days: [1..7], tz}
 //   POST /api/reminders?kind=words&test=1 — (sync key or Mini App) send that reminder right now
+//   GET|PUT /api/reminders?quotes=1       — (sync key or Mini App) the Statham quote at the end: {enabled, mat}
 //   GET|POST /api/reminders?tick=1        — external scheduler (cron-job.org, every 5 min), with CRON_SECRET:
 //        sends every reminder whose time has come, once a day each.
 // /api/cuff-remind is the same handler (kind defaults to cuff) — older scheduler links keep working.
 // Vercel Cron on the free plan runs at most once a day, so it can't hit an arbitrary minute — hence the external tick.
 const {
   redis, KEY_CUFF_REMIND, cuffDoneKey, loadState, dueWords, sendReminder,
-  checkAuth, safeEqual, telegram, ownerId, appButton, readJson, send, handle, httpError, query, today,
+  quoteLine, quoteSettings, saveQuoteSettings, checkAuth, safeEqual, telegram, ownerId, appButton, readJson, send, handle, httpError, query, today,
 } = require("./_lib");
 
 const KEY_TICK = "vocab:cuff_tick";
@@ -68,7 +69,7 @@ const SENDERS = {
     const rule = g.curTitle ? `\n\nПравило недели: ${g.curUnit ? g.curUnit + " · " : ""}${g.curTitle}` : "";
     await telegram("sendMessage", {
       chat_id: await chatId(),
-      text: `📘 Время для грамматики!${rule}\n\nПрочитай правило и сделай упражнения.`,
+      text: `📘 Время для грамматики!${rule}\n\nПрочитай правило и сделай упражнения.` + (await quoteLine()),
       reply_markup: { inline_keyboard: [[appButton(req, "📘 Открыть правило", "grammar")]] },
     });
     return true;
@@ -77,7 +78,7 @@ const SENDERS = {
     if (!test && await redis("GET", cuffDoneKey(date))) return false;
     await telegram("sendMessage", {
       chat_id: await chatId(),
-      text: "🎙️ Время для Speak off the cuff!\n\nКрути рулетку и поговори пару минут на случайную тему.",
+      text: "🎙️ Время для Speak off the cuff!\n\nКрути рулетку и поговори пару минут на случайную тему." + (await quoteLine()),
       reply_markup: { inline_keyboard: [[appButton(req, "🎡 Крутить рулетку", "cuff")]] },
     });
     return true;
@@ -118,6 +119,11 @@ module.exports = handle(async (req, res) => {
   const q = query(req);
   if (q.get("tick") === "1") return tick(req, res);
   await checkAuth(req);
+  // Statham quotes in reminders: GET → {enabled, mat}, PUT {enabled, mat}.
+  if (q.get("quotes") === "1") {
+    if (req.method === "PUT" || req.method === "POST") await saveQuoteSettings(await readJson(req));
+    return send(res, 200, { quotes: await quoteSettings() });
+  }
   const kind = q.get("kind") || "cuff";
   if (!KINDS[kind]) throw httpError(400, "Неизвестное напоминание");
   if (q.get("test") === "1" && req.method === "POST") {

@@ -188,6 +188,11 @@
       save: (kind, settings) => api(`/api/reminders?kind=${kind}`, { method: "PUT", body: JSON.stringify(settings) }),
       test: (kind) => api(`/api/reminders?kind=${kind}&test=1`, { method: "POST" }),
     },
+    // Meme Statham quote at the end of every reminder: {enabled, mat}.
+    quotes: {
+      get: () => api("/api/reminders?quotes=1"),
+      save: (q) => api("/api/reminders?quotes=1", { method: "PUT", body: JSON.stringify(q) }),
+    },
     // Course book material, private to the learner (api/book.js).
     bookGet: () => api("/api/book"),
     bookPut: (book) => api("/api/book", { method: "PUT", body: JSON.stringify(book) }),

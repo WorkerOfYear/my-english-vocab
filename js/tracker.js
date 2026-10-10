@@ -58,6 +58,8 @@
         note: (r) => "Бот пишет, только если есть слова к повторению." + (r.saved ? "" : " Пока ты не поменяешь настройки, напоминание приходит раз в день около 19:00–20:00 по Новосибирску."),
       });
       let remindLoaded = false;
+      let quotes = App.store.get("quotes", { enabled: true, mat: true });
+      let quotesMsg = "";
       function draw() {
         const due = srs.dueWords();
         const active = srs.activeGroups();
@@ -176,11 +178,32 @@
           ${wordsRemind()}</div>`;
       }
 
-      const wordsRemind = () => `<h3 class="section">🔔 Когда напоминать о словах</h3>${remind.html()}`;
+      const wordsRemind = () => `<h3 class="section">🔔 Когда напоминать о словах</h3>${remind.html()}
+        <h3 class="section">💬 Цитата Стэтхэма в напоминаниях</h3>
+        <label class="row check"><input type="checkbox" id="q-on" ${quotes.enabled ? "checked" : ""}> Добавлять цитату к каждому напоминанию</label>
+        <label class="row check${quotes.enabled ? "" : " muted"}"><input type="checkbox" id="q-mat" ${quotes.mat ? "checked" : ""} ${quotes.enabled ? "" : "disabled"}> Можно с матом</label>
+        ${quotesMsg ? `<p class="small">${esc(quotesMsg)}</p>` : ""}`;
+
+      async function saveQuotes(patch) {
+        quotes = { ...quotes, ...patch };
+        App.store.set("quotes", quotes);
+        quotesMsg = "⏳ Сохраняю…";
+        draw();
+        try { quotes = (await App.sync.quotes.save(quotes)).quotes; quotesMsg = "✓ Сохранено"; } catch (e) { quotesMsg = "⚠️ " + e.message; }
+        App.store.set("quotes", quotes);
+        draw();
+      }
 
       function bindSync() {
         remind.bind(root, draw);
-        if (!remindLoaded && App.sync.connected) { remindLoaded = true; remind.load(draw); }
+        if (!remindLoaded && App.sync.connected) {
+          remindLoaded = true;
+          remind.load(draw);
+          App.sync.quotes.get().then((r) => { quotes = r.quotes; App.store.set("quotes", quotes); draw(); }).catch(() => {});
+        }
+        const qOn = root.querySelector("#q-on"), qMat = root.querySelector("#q-mat");
+        if (qOn) qOn.onchange = (e) => saveQuotes({ enabled: e.target.checked });
+        if (qMat) qMat.onchange = (e) => saveQuotes({ mat: e.target.checked });
         const $ = (sel) => root.querySelector(sel);
         const msg = (html) => { const el = $("#sync-msg"); if (el) el.innerHTML = html; };
         const form = $("#sync-form");
