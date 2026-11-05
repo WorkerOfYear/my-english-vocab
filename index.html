@@ -27,7 +27,14 @@
       if (inTg) document.write('<script src="https://telegram.org/js/telegram-web-app.js"><\/script>');
     })();
   </script>
-  <script src="js/words.js"></script>
+  <script>
+    // Each account can have its own dictionary: js/words-<uid>.js (scripts/extract_doc_words.py). Everyone else — js/words.js.
+    (function () {
+      var OWN = ["angel"], uid = "";
+      try { uid = (JSON.parse(localStorage.getItem("vocab.session") || "null") || {}).uid || ""; } catch (e) {}
+      document.write('<script src="js/words' + (OWN.indexOf(uid) >= 0 ? "-" + uid : "") + '.js"><\/script>');
+    })();
+  </script>
   <script src="js/audio.js"></script>
   <script src="js/common.js"></script>
   <script src="js/parse.js"></script>

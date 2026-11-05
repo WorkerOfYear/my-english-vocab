@@ -7,6 +7,11 @@
     title: "Вставь слово",
     render(root) {
       const pool = App.filtered().filter((w) => w.cloze && w.example.includes(w.cloze));
+      // A dictionary without example sentences (e.g. one from lesson notes) can't play this game at all.
+      if (!App.ALL.some((w) => w.cloze)) {
+        root.innerHTML = `<div class="card center"><p>Для этой игры нужны примеры предложений, а в твоём словаре их пока нет.</p></div>`;
+        return;
+      }
       if (pool.length < 4) return App.notEnough(root, 4);
       let words, i, score, answered, choice, hinted;
 
