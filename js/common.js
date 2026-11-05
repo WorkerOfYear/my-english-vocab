@@ -184,9 +184,11 @@ window.App = window.App || {};
   App.speak = (en, opts = {}) => {
     const text = App.speakText(en);
     const s = App.slug(en);
-    const src = `audio/${opts.slow ? "slow/" : ""}${s}.mp3`;
+    // Pre-generated mp3, or — for words added on the site — the same voice from /api/tts (cached by the CDN).
+    const src = withAudio.has(s) ? `audio/${opts.slow ? "slow/" : ""}${s}.mp3`
+      : App.online && /^[A-Za-z0-9 ,.'’?!-]{1,80}$/.test(text) ? `api/tts?t=${encodeURIComponent(text)}${opts.slow ? "&slow=1" : ""}` : "";
     if (current) { current.pause(); current = null; }
-    if (!s || !withAudio.has(s) || missing.has(src)) return synth(text, opts.slow);
+    if (!s || !src || missing.has(src)) return synth(text, opts.slow);
     const a = new Audio(src);
     current = a;
     const fallback = () => {
