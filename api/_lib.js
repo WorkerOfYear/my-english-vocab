@@ -1,11 +1,25 @@
 // Shared helpers for the serverless functions (files starting with "_" are not exposed as routes).
 const crypto = require("crypto");
 
-const KEY_STATE = "vocab:state";
-const KEY_OWNER = "vocab:tg_owner"; // chat id of the learner (private chat id == Telegram user id)
-const KEY_LINK = "vocab:tg_link"; // one-time code for t.me/<bot>?start=<code>
-const KEY_CUFF_REMIND = "vocab:cuff_remind"; // "Speak off the cuff" reminder settings
-const cuffDoneKey = (date) => `vocab:cuff_done:${date}`; // a recording was sent that day → no reminder
+// ---------- accounts
+// Every account has its own progress, settings and Telegram chat. Keys are "vocab:u:<uid>:<name>", except for
+// LEGACY_UID: that account owns everything saved before accounts existed, so its keys stay "vocab:<name>".
+const LEGACY_UID = "artem";
+const uk = (uid, name) => (uid === LEGACY_UID ? `vocab:${name}` : `vocab:u:${uid}:${name}`);
+const KEY_USERS = "vocab:users"; // set of uids
+const accountKey = (uid) => `vocab:account:${uid}`; // {login, salt, hash, created}
+const sessionKey = (token) => `vocab:session:${token}`; // → uid
+const linkKey = (code) => `vocab:tg_link:${code}`; // one-time code for t.me/<bot>?start=<code> → uid
+const chatKey = (chat) => `vocab:tg_chat:${chat}`; // Telegram chat → uid
+const SESSION_TTL = 365 * 86400;
+
+// Accounts created on first use (scrypt hashes, the passwords themselves are not stored anywhere).
+const SEED_ACCOUNTS = [
+  { login: "Artem", salt: "697a5853bde150a6adc1b64670191cb7", hash: "f301ce172993f25d81d704a2051d6bb9540a15c9f274485535c6f8ba1417f151" },
+  { login: "Angel", salt: "89935270e5758acc9db02736fda4a3e2", hash: "18a42c050fa3543ae2f82a31fc453104f34383c0340c17a9f54c35f396d298e5" },
+];
+
+const cuffDoneKey = (uid, date) => uk(uid, `cuff_done:${date}`); // a recording was sent that day → no reminder
 
 // ---------- storage: Upstash Redis REST API (Vercel Marketplace → Upstash for Redis)
 // Vercel may add a custom prefix to the variable names (e.g. STORAGE_KV_REST_API_URL), so match by suffix.
@@ -33,16 +47,101 @@ async function redis(...command) {
   return data.result;
 }
 
-async function loadState() {
-  const raw = await redis("GET", KEY_STATE);
+async function loadState(uid) {
+  const raw = await redis("GET", uk(uid, "state"));
   return raw ? JSON.parse(raw) : null;
 }
-const saveState = (doc) => redis("SET", KEY_STATE, JSON.stringify(doc));
+const saveState = (uid, doc) => redis("SET", uk(uid, "state"), JSON.stringify(doc));
 
-async function ownerId() {
-  return process.env.TELEGRAM_CHAT_ID || (await redis("GET", KEY_OWNER)) || null;
+// ---------- accounts and sessions
+const normLogin = (login) => String(login || "").trim().toLowerCase();
+const hashPassword = (password, salt) => crypto.scryptSync(String(password), salt, 32).toString("hex");
+
+async function ensureSeedAccounts() {
+  for (const a of SEED_ACCOUNTS) {
+    const uid = normLogin(a.login);
+    await redis("SET", accountKey(uid), JSON.stringify({ ...a, created: Date.now() }), "NX");
+    await redis("SADD", KEY_USERS, uid);
+  }
 }
-const setOwner = (id) => redis("SET", KEY_OWNER, String(id));
+
+async function listUsers() {
+  await ensureSeedAccounts();
+  return (await redis("SMEMBERS", KEY_USERS)) || [];
+}
+
+async function getAccount(uid) {
+  const raw = await redis("GET", accountKey(uid));
+  return raw ? JSON.parse(raw) : null;
+}
+
+async function createAccount(login, password) {
+  const uid = normLogin(login);
+  if (!/^[a-z0-9_.-]{2,32}$/.test(uid)) throw httpError(400, "Логин: 2–32 латинские буквы, цифры, точка, дефис или _");
+  if (String(password || "").length < 4) throw httpError(400, "Пароль слишком короткий");
+  const salt = crypto.randomBytes(16).toString("hex");
+  const ok = await redis("SET", accountKey(uid), JSON.stringify({ login: String(login).trim(), salt, hash: hashPassword(password, salt), created: Date.now() }), "NX");
+  if (!ok) throw httpError(409, "Такой логин уже есть");
+  await redis("SADD", KEY_USERS, uid);
+  return uid;
+}
+
+// Checks the password (10 wrong attempts → 15 minutes pause), returns the account.
+async function checkPassword(login, password) {
+  await ensureSeedAccounts();
+  const uid = normLogin(login);
+  const failKey = `vocab:login_fail:${uid}`;
+  if (Number(await redis("GET", failKey)) >= 10) throw httpError(429, "Слишком много попыток — подожди 15 минут");
+  const acc = uid && (await getAccount(uid));
+  if (!acc || !safeEqual(hashPassword(password, acc.salt), acc.hash)) {
+    if (acc) { await redis("INCR", failKey); await redis("EXPIRE", failKey, 900); }
+    throw httpError(401, "Неверный логин или пароль");
+  }
+  await redis("DEL", failKey);
+  return { uid, ...acc };
+}
+
+async function setPassword(uid, password) {
+  if (String(password || "").length < 4) throw httpError(400, "Пароль слишком короткий");
+  const acc = await getAccount(uid);
+  if (!acc) throw httpError(404, "Аккаунт не найден");
+  acc.salt = crypto.randomBytes(16).toString("hex");
+  acc.hash = hashPassword(password, acc.salt);
+  await redis("SET", accountKey(uid), JSON.stringify(acc));
+}
+
+async function createSession(uid) {
+  const token = crypto.randomBytes(32).toString("hex");
+  await redis("SET", sessionKey(token), uid, "EX", SESSION_TTL);
+  const acc = await getAccount(uid);
+  return { token, uid, login: (acc && acc.login) || uid, legacy: uid === LEGACY_UID };
+}
+const dropSession = (token) => redis("DEL", sessionKey(token));
+
+// ---------- Telegram chat of each account (private chat id == Telegram user id)
+async function chatOf(uid) {
+  if (uid === LEGACY_UID && process.env.TELEGRAM_CHAT_ID) return process.env.TELEGRAM_CHAT_ID;
+  return (await redis("GET", uk(uid, "tg_owner"))) || null;
+}
+
+async function uidByChat(chat) {
+  const uid = await redis("GET", chatKey(chat));
+  if (uid) return uid;
+  // The chat bound before accounts existed belongs to the legacy account.
+  const legacy = await chatOf(LEGACY_UID);
+  return legacy && String(legacy) === String(chat) ? LEGACY_UID : null;
+}
+
+// One chat ↔ one account: binding moves the chat away from whoever had it.
+async function bindChat(uid, chat) {
+  chat = String(chat);
+  const prevUid = await uidByChat(chat);
+  if (prevUid && prevUid !== uid) await redis("DEL", uk(prevUid, "tg_owner"));
+  const prevChat = await redis("GET", uk(uid, "tg_owner"));
+  if (prevChat && prevChat !== chat) await redis("DEL", chatKey(prevChat));
+  await redis("SET", uk(uid, "tg_owner"), chat);
+  await redis("SET", chatKey(chat), uid);
+}
 
 // ---------- auth
 function httpError(status, message) {
@@ -56,6 +155,7 @@ const safeEqual = (a, b) => {
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 };
 
+// SYNC_KEY is the admin key now: it can create accounts, and it still opens the legacy account (old devices).
 function checkSyncKey(req) {
   const expected = process.env.SYNC_KEY;
   if (!expected) throw httpError(500, "На сервере не задан SYNC_KEY");
@@ -79,17 +179,28 @@ function verifyInitData(initData, maxAgeSec = 7 * 24 * 3600) {
   try { return JSON.parse(params.get("user") || "null"); } catch (e) { return null; }
 }
 
-// Either the sync key (website) or valid Mini App data from the bot's owner (inside Telegram).
+// Who is calling → uid. A session token (login + password), or, for older clients, the sync key (legacy account)
+// or Mini App launch data of a Telegram user bound to an account.
 async function checkAuth(req) {
+  const token = req.headers["x-session"];
+  if (token) {
+    const uid = /^[0-9a-f]{64}$/.test(token) ? await redis("GET", sessionKey(token)) : null;
+    if (!uid) throw httpError(401, "Сессия истекла — войди заново");
+    return uid;
+  }
+  if (req.headers["x-sync-key"]) {
+    checkSyncKey(req);
+    return LEGACY_UID;
+  }
   const init = req.headers["x-telegram-init-data"];
-  if (init && !req.headers["x-sync-key"]) {
+  if (init) {
     const user = verifyInitData(init);
     if (!user) throw httpError(401, "Не удалось проверить вход через Telegram — открой приложение заново");
-    const owner = await ownerId();
-    if (!owner || String(user.id) !== String(owner)) throw httpError(403, "Это личное приложение: бот привязан к другому аккаунту");
-    return;
+    const uid = await uidByChat(user.id);
+    if (!uid) throw httpError(401, "Этот Telegram не привязан к аккаунту — войди по логину и паролю");
+    return uid;
   }
-  checkSyncKey(req);
+  throw httpError(401, "Войди в аккаунт");
 }
 
 // Secret Telegram sends back with every webhook call, so nobody else can post fake updates.
@@ -131,8 +242,8 @@ async function telegram(method, payload) {
   return data.result;
 }
 
-async function chatId() {
-  const id = await ownerId();
+async function chatId(uid) {
+  const id = await chatOf(uid);
   if (!id) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в трекере");
   return id;
 }
@@ -162,39 +273,37 @@ function reminderText(due, { test = false } = {}) {
 }
 
 // ---------- a meme "Jason Statham quote" at the end of every reminder (api/_quotes.json: [text, has swearing])
-const KEY_QUOTES = "vocab:quotes"; // settings {enabled, mat}
-const KEY_QUOTES_USED = "vocab:quotes_used"; // quotes already sent in this lap — no repeats until all have been used
-
-async function quoteSettings() {
-  const raw = await redis("GET", KEY_QUOTES);
+// Per account: "quotes" — settings {enabled, mat}; "quotes_used" — quotes already sent in this lap (no repeats until all are used).
+async function quoteSettings(uid) {
+  const raw = await redis("GET", uk(uid, "quotes"));
   return Object.assign({ enabled: true, mat: true }, raw ? JSON.parse(raw) : {});
 }
-const saveQuoteSettings = (s) => redis("SET", KEY_QUOTES, JSON.stringify({ enabled: !!s.enabled, mat: !!s.mat }));
+const saveQuoteSettings = (uid, s) => redis("SET", uk(uid, "quotes"), JSON.stringify({ enabled: !!s.enabled, mat: !!s.mat }));
 
 // "\n\n💬 «…»" or "" — never fails the reminder itself.
-async function quoteLine() {
+async function quoteLine(uid) {
   try {
-    const s = await quoteSettings();
+    const s = await quoteSettings(uid);
     if (!s.enabled) return "";
     const all = require("./_quotes.json").quotes;
     const pool = all.map((q, i) => i).filter((i) => s.mat || !all[i][1]);
-    let used = JSON.parse((await redis("GET", KEY_QUOTES_USED)) || "[]");
+    let used = JSON.parse((await redis("GET", uk(uid, "quotes_used"))) || "[]");
     let fresh = pool.filter((i) => !used.includes(i));
     if (!fresh.length) { used = []; fresh = pool; }
     const i = fresh[Math.floor(Math.random() * fresh.length)];
-    await redis("SET", KEY_QUOTES_USED, JSON.stringify([...used, i]));
+    await redis("SET", uk(uid, "quotes_used"), JSON.stringify([...used, i]));
     return `\n\n💬 «${all[i][0]}»\n— Джейсон Стэтхэм`;
   } catch (e) {
     return "";
   }
 }
 
-async function sendReminder(req, due, opts) {
+async function sendReminder(req, uid, due, opts) {
   const text = reminderText(due, opts);
   if (!text) return { sent: false, due: 0 };
   await telegram("sendMessage", {
-    chat_id: await chatId(),
-    text: text + (await quoteLine()),
+    chat_id: await chatId(uid),
+    text: text + (await quoteLine(uid)),
     reply_markup: { inline_keyboard: [[due.length ? appButton(req, "▶️ Начать повторение", "review") : appButton(req, "📚 Открыть", "")]] },
   });
   return { sent: true, due: due.length };
@@ -227,7 +336,9 @@ const handle = (fn) => async (req, res) => {
 const query = (req) => new URLSearchParams((req.url || "").split("?")[1] || "");
 
 module.exports = {
-  redis, KEY_LINK, KEY_CUFF_REMIND, cuffDoneKey, loadState, saveState, ownerId, setOwner,
+  redis, uk, LEGACY_UID, cuffDoneKey, loadState, saveState,
+  listUsers, getAccount, createAccount, checkPassword, setPassword, createSession, dropSession,
+  linkKey, chatOf, uidByChat, bindChat, chatId,
   checkSyncKey, checkAuth, verifyInitData, webhookSecret, safeEqual,
   today, dueWords, telegram, quoteLine, quoteSettings, saveQuoteSettings, siteUrl, appButton, words, reminderText, sendReminder,
   readJson, send, handle, httpError, query,

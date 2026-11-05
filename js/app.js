@@ -172,14 +172,15 @@
   function route() {
     if (cleanup) { cleanup(); cleanup = null; }
     if ("speechSynthesis" in window) speechSynthesis.cancel();
-    const name = (location.hash.slice(1) || "home").split("?")[0];
+    // On the website nothing opens until you sign in.
+    const name = App.needLogin ? "login" : (location.hash.slice(1) || "home").split("?")[0];
     const page = App.pages[name] || App.pages.home;
     const params = App.hashParams();
     const title = typeof page.title === "function" ? page.title(params) : page.title;
     const back = document.getElementById("back");
     const parent = App.backHash();
     document.getElementById("title").textContent = title;
-    back.hidden = page === App.pages.home;
+    back.hidden = page === App.pages.home || App.needLogin;
     back.href = "#" + parent;
     back.title = parent ? "Назад" : "На главную";
     back.setAttribute("aria-label", back.title);

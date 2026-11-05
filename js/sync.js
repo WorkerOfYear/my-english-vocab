@@ -1,11 +1,17 @@
-// Sync progress (tracker, hard words, added words) through /api/state so the phone and the computer
-// see the same thing, and so the server can send Telegram reminders. Works only on the deployed site.
+// Sync progress (tracker, hard words, added words) of the signed-in account through /api/state so the phone and
+// the computer see the same thing, and so the server can send Telegram reminders. Works only on the deployed site.
 (function (App) {
   const SYNCED = ["srs", "hard", "custom", "grammar"];
-  const online = /^https?:$/.test(location.protocol);
-  // Inside the Telegram Mini App the signed launch data replaces the sync key.
-  const tgInit = (App.tg && App.tg.initData) || "";
-  const meta = Object.assign({ key: "", syncedAt: 0, dirty: false, lastOk: 0, error: "" }, App.store.get("syncMeta", {}));
+  const online = App.online;
+  const token = () => (App.session && App.session.token) || "";
+  const meta = Object.assign({ syncedAt: 0, dirty: false, lastOk: 0, error: "" }, App.store.get("syncMeta", {}));
+  delete meta.key; // the old shared SYNC_KEY — replaced by accounts
+  // Just signed in on this device: whatever this browser already had for the account is merged with the server's.
+  if (App.session && App.session.fresh) {
+    meta.syncedAt = 0;
+    meta.dirty = (App.store.get("srs", {}).groups || []).length > 0 || App.custom.length > 0;
+    App.saveSession({ ...App.session, fresh: false });
+  }
   let applying = false;
   let timer = null;
   let busy = null;
@@ -17,7 +23,7 @@
   const rawSet = App.store.set;
   App.store.set = (key, value) => {
     rawSet(key, value);
-    if (!applying && SYNCED.includes(key) && (meta.key || tgInit)) {
+    if (!applying && SYNCED.includes(key) && token()) {
       meta.dirty = true;
       saveMeta();
       schedulePush();
@@ -29,18 +35,19 @@
       ...opts,
       headers: {
         "Content-Type": "application/json",
-        ...(meta.key ? { "x-sync-key": meta.key } : { "x-telegram-init-data": tgInit }),
+        ...(token() ? { "x-session": token() } : {}),
+        ...(App.tg && App.tg.initData ? { "x-telegram-init-data": App.tg.initData } : {}),
         ...(opts.headers || {}),
       },
     });
     const data = await r.json().catch(() => ({}));
+    // The session ended (signed out on the server or expired) → back to the sign-in screen.
+    if (r.status === 401 && token() && !opts.noLogout) { App.saveSession(null); location.reload(); }
     if (!r.ok) throw Object.assign(new Error(data.error || `Ошибка сервера (${r.status})`), { status: r.status });
     return data;
   }
 
   const local = () => ({ srs: App.store.get("srs", {}), hard: App.hard, custom: App.custom, grammar: App.store.get("grammar", {}) });
-  const hasLocalData = () => (App.store.get("srs", {}).groups || []).length > 0 || App.custom.length > 0;
-
   // Union of two devices' progress: a card keeps the version with more reviews.
   function merge(a, b) {
     const sa = a.srs || {}, sb = b.srs || {};
@@ -106,7 +113,7 @@
   }
 
   function run(task) {
-    if (!online || !(meta.key || tgInit)) return Promise.resolve();
+    if (!online || !token()) return Promise.resolve();
     busy = (busy || Promise.resolve()).then(task).then(() => {
       meta.error = "";
       meta.lastOk = Date.now();
@@ -145,40 +152,22 @@
 
   App.sync = {
     online,
-    get connected() { return online && !!(meta.key || tgInit); },
-    get viaTelegram() { return online && !meta.key && !!tgInit; },
-    get key() { return meta.key; },
+    api,
+    get connected() { return online && !!token(); },
     status() {
       if (!online) return "Синхронизация работает только на сайте в интернете, не из файла.";
-      if (!meta.key && !tgInit) return "";
+      if (!token()) return "";
       if (meta.error) return "⚠️ " + meta.error;
       if (meta.dirty) return "⏳ Сохраняю…";
       if (!meta.lastOk) return "⏳ Подключаюсь…";
       const t = new Date(meta.lastOk);
       return `☁️ Синхронизировано в ${String(t.getHours()).padStart(2, "0")}:${String(t.getMinutes()).padStart(2, "0")}`;
     },
-    async connect(key) {
-      meta.key = key.trim();
-      meta.syncedAt = 0;
-      meta.dirty = hasLocalData(); // keep this device's progress: it gets merged with the server's
-      meta.error = "";
-      saveMeta();
-      emit();
-      await pull();
-      if (meta.error) {
-        const err = meta.error;
-        meta.key = "";
-        saveMeta();
-        emit();
-        throw new Error(err);
-      }
+    // Push what's left before signing out, so nothing is lost.
+    async flush() {
+      clearTimeout(timer);
+      if (meta.dirty) await run(pushNow);
     },
-    disconnect() {
-      Object.assign(meta, { key: "", syncedAt: 0, dirty: false, lastOk: 0, error: "" });
-      saveMeta();
-      emit();
-    },
-    deviceLink() { return `${location.origin}${location.pathname}#sync=${encodeURIComponent(meta.key)}`; },
     // Bot: bind it to this learner (returns a one-time t.me link) and check whether it's bound.
     setupBot() { return api("/api/telegram?setup=1", { method: "POST" }); },
     botStatus() { return api("/api/telegram?status=1"); },
@@ -204,13 +193,8 @@
     pull,
   };
 
-  // A link like https://site/#sync=KEY connects this device in one tap.
-  const m = location.hash.match(/^#sync=(.+)$/);
-  if (m && online) {
-    history.replaceState(null, "", location.pathname + "#tracker");
-    App.sync.connect(decodeURIComponent(m[1])).catch(() => {});
-  } else {
-    pull();
-  }
+  // Old one-tap links with the shared key (#sync=KEY) no longer work — sign in instead.
+  if (/^#sync=/.test(location.hash)) history.replaceState(null, "", location.pathname + "#tracker");
+  pull();
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pull(); });
 })(window.App);

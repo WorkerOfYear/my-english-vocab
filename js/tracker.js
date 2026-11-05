@@ -152,27 +152,12 @@
         if (!sync.online) {
           return `${head}<p class="muted small">${esc(sync.status())} Открой сайт на Vercel, чтобы подключить напоминания.</p></div>`;
         }
-        if (sync.viaTelegram) {
-          return `${head}<p class="small">✅ Вход через Telegram — прогресс общий с сайтом.</p>
-            <p class="small" id="sync-status">${esc(sync.status())}</p>
-            <p class="small" id="sync-msg"></p>
-            ${wordsRemind()}</div>`;
-        }
-        if (!sync.connected) {
-          return `${head}<p class="muted small">Прогресс будет одинаковым на телефоне и компьютере, а бот в Telegram будет присылать
-            вечером ссылку на повторение. Введи ключ — это значение <code>SYNC_KEY</code> из настроек проекта в Vercel.</p>
-            <form class="row" id="sync-form">
-              <input class="field" id="sync-key" type="password" placeholder="Ключ синхронизации" autocomplete="off" style="flex:1;min-width:180px">
-              <button class="btn primary">Подключить</button>
-            </form>
-            <p class="small" id="sync-status"></p></div>`;
-        }
-        return `${head}<p class="small" id="sync-status">${esc(sync.status())}</p>
+        return `${head}${App.accountHtml()}
+          <p class="small" id="sync-status">${esc(sync.status())}</p>
+          <p class="muted small">Прогресс этого аккаунта одинаковый на всех устройствах: просто войди под тем же логином.</p>
           <p class="small" id="bot-status">🤖 Проверяю бота…</p>
           <div class="row">
             <button class="btn" id="bot-setup">🤖 Подключить бота</button>
-            <button class="btn" id="sync-link">📱 Подключить телефон</button>
-            <button class="btn danger" id="sync-off">Отключить</button>
           </div>
           <p class="small" id="sync-msg"></p>
           ${wordsRemind()}</div>`;
@@ -195,6 +180,7 @@
       }
 
       function bindSync() {
+        App.bindAccount(root, draw);
         remind.bind(root, draw);
         if (!remindLoaded && App.sync.connected) {
           remindLoaded = true;
@@ -206,21 +192,12 @@
         if (qMat) qMat.onchange = (e) => saveQuotes({ mat: e.target.checked });
         const $ = (sel) => root.querySelector(sel);
         const msg = (html) => { const el = $("#sync-msg"); if (el) el.innerHTML = html; };
-        const form = $("#sync-form");
-        if (form) form.onsubmit = async (e) => {
-          e.preventDefault();
-          const key = $("#sync-key").value.trim();
-          if (!key) return;
-          $("#sync-status").textContent = "⏳ Подключаюсь…";
-          try { await App.sync.connect(key); draw(); }
-          catch (err) { $("#sync-status").textContent = "⚠️ " + err.message; }
-        };
         const botStatus = $("#bot-status");
         if (botStatus) {
           App.sync.botStatus().then((b) => {
             botStatus.innerHTML = b.linked
               ? `🤖 Бот <a href="https://t.me/${esc(b.bot)}" target="_blank" rel="noopener">@${esc(b.bot)}</a> подключён ✓`
-              : `🤖 Бот <b>@${esc(b.bot)}</b> ещё не привязан — нажми «Подключить бота»`;
+              : `🤖 Бот <b>@${esc(b.bot)}</b> ещё не привязан к этому аккаунту — нажми «Подключить бота»`;
             if (b.linked) $("#bot-setup").textContent = "🤖 Переподключить бота";
           }).catch((err) => { botStatus.textContent = "🤖 " + err.message; });
         }
@@ -229,23 +206,9 @@
           msg("⏳ Настраиваю бота…");
           try {
             const r = await App.sync.setupBot();
-            msg(`Открой ссылку и нажми <b>Start</b> — бот запомнит тебя (ссылка работает час):<br>
+            msg(`Открой ссылку и нажми <b>Start</b> — бот запомнит, что этот Telegram твой (ссылка работает час):<br>
               <a class="btn primary" href="${esc(r.link)}" target="_blank" rel="noopener" style="margin-top:8px">Открыть @${esc(r.bot)} в Telegram</a>`);
           } catch (err) { msg("⚠️ " + esc(err.message)); }
-        };
-        const link = $("#sync-link");
-        if (link) link.onclick = async () => {
-          const url = App.sync.deviceLink();
-          try {
-            await navigator.clipboard.writeText(url);
-            msg("🔗 Ссылка скопирована. Открой её на телефоне — он подключится сам. Никому её не отправляй.");
-          } catch (e) {
-            msg(`Открой эту ссылку на телефоне (никому её не отправляй):<br><input class="field small" readonly value="${esc(url)}" onfocus="this.select()">`);
-          }
-        };
-        const off = $("#sync-off");
-        if (off) off.onclick = async () => {
-          if (await App.confirm("Отключить синхронизацию на этом устройстве? Прогресс останется в браузере.")) { App.sync.disconnect(); draw(); }
         };
       }
 

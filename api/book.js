@@ -1,15 +1,14 @@
 // Course book material (Grammar Bank + Workbook exercises), private to the learner.
 // It is copyrighted, so it never goes into git or the public static files: the learner uploads the file once,
-// it is kept in their own Redis, and only they can read it (sync key or their Telegram Mini App).
+// it is kept in Redis under their account, and only they can read it.
 //   GET /api/book  → { book: {meta, units: {"1A": {...}}} | null }
 //   PUT /api/book  body: the same object → stored unit by unit (Upstash rejects requests over 1 MB)
-const { redis, checkAuth, readJson, send, handle, httpError } = require("./_lib");
-
-const KEY_INDEX = "vocab:book:index";
-const unitKey = (u) => `vocab:book:unit:${u}`;
+const { redis, uk, checkAuth, readJson, send, handle, httpError } = require("./_lib");
 
 module.exports = handle(async (req, res) => {
-  await checkAuth(req);
+  const uid = await checkAuth(req);
+  const KEY_INDEX = uk(uid, "book:index");
+  const unitKey = (u) => uk(uid, `book:unit:${u}`);
   if (req.method === "GET") {
     const raw = await redis("GET", KEY_INDEX);
     if (!raw) return send(res, 200, { book: null });

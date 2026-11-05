@@ -321,7 +321,7 @@
         if (!App.sync || !App.sync.connected) {
           r.status = "local";
           r.error = App.sync && App.sync.online
-            ? "Чтобы запись уходила в Telegram, подключи синхронизацию и бота в трекере (☁️ Синхронизация и Telegram)."
+            ? "Чтобы запись уходила в Telegram, войди в аккаунт и подключи бота в трекере (☁️ Синхронизация и Telegram)."
             : "Отправка в Telegram работает только на сайте в интернете. Запись можно скачать.";
           return draw();
         }

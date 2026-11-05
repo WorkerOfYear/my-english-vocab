@@ -1,15 +1,17 @@
 // Telegram bot:
 //   POST /api/telegram            — webhook: Telegram sends updates here (checked by secret header)
-//   POST /api/telegram?setup=1    — (sync key) register webhook + menu button, return a one-time link to bind the bot
-//   GET  /api/telegram?status=1   — (sync key or Mini App) bot name and whether it's bound to the learner
+//   POST /api/telegram?setup=1    — (signed in) register webhook + menu button, return a one-time link that binds
+//                                   the account to the Telegram chat that opens it
+//   GET  /api/telegram?status=1   — (signed in) bot name and whether this account has a chat bound
+// One bot for every account: each chat is bound to one account, and reminders go to each account's own chat.
 const crypto = require("crypto");
 const {
-  redis, KEY_LINK, loadState, ownerId, setOwner, checkAuth, checkSyncKey, webhookSecret, safeEqual,
+  redis, linkKey, loadState, chatOf, uidByChat, bindChat, checkAuth, webhookSecret,
   dueWords, telegram, siteUrl, appButton, words, readJson, send, handle, httpError, query,
 } = require("./_lib");
 
 async function setup(req, res) {
-  checkSyncKey(req);
+  const uid = await checkAuth(req);
   const me = await telegram("getMe");
   await telegram("setWebhook", {
     url: `${siteUrl(req)}/api/telegram`,
@@ -24,18 +26,18 @@ async function setup(req, res) {
     ],
   });
   const code = crypto.randomBytes(12).toString("hex");
-  await redis("SET", KEY_LINK, code, "EX", 3600);
-  send(res, 200, { bot: me.username, link: `https://t.me/${me.username}?start=${code}`, linked: !!(await ownerId()) });
+  await redis("SET", linkKey(code), uid, "EX", 3600);
+  send(res, 200, { bot: me.username, link: `https://t.me/${me.username}?start=${code}`, linked: !!(await chatOf(uid)) });
 }
 
 async function status(req, res) {
-  await checkAuth(req);
+  const uid = await checkAuth(req);
   const me = await telegram("getMe");
-  send(res, 200, { bot: me.username, linked: !!(await ownerId()) });
+  send(res, 200, { bot: me.username, linked: !!(await chatOf(uid)) });
 }
 
-async function todayMessage(req) {
-  const doc = await loadState();
+async function todayMessage(req, uid) {
+  const doc = await loadState(uid);
   const due = dueWords(doc && doc.data && doc.data.srs);
   return due.length
     ? { text: `🗓️ Сегодня к повторению ${words(due.length)}.`, button: appButton(req, "▶️ Начать повторение", "review") }
@@ -57,22 +59,22 @@ async function webhook(req, res) {
 
   const start = text.match(/^\/start(?:\s+(\S+))?/);
   const code = start && start[1];
-  if (code) {
-    const expected = await redis("GET", KEY_LINK);
-    if (expected && safeEqual(code, expected)) {
-      await setOwner(chat);
-      await redis("DEL", KEY_LINK);
+  if (code && /^[0-9a-f]{24}$/.test(code)) {
+    const uid = await redis("GET", linkKey(code));
+    if (uid) {
+      await bindChat(uid, chat);
+      await redis("DEL", linkKey(code));
       await reply("✅ Готово! Теперь это твой бот: каждый вечер пришлю слова, которые пора повторить.\n\nПриложение открывается кнопкой «Учить» внизу.", appButton(req, "📚 Открыть приложение", ""));
       return send(res, 200, { ok: true });
     }
   }
 
-  const owner = await ownerId();
-  if (owner && chat === String(owner)) {
-    const t = await todayMessage(req);
+  const uid = await uidByChat(chat);
+  if (uid) {
+    const t = await todayMessage(req, uid);
     await reply(t.text, t.button);
   } else {
-    await reply("Это личный бот для изучения английских слов 🙂");
+    await reply("Это бот для изучения английских слов 🙂 Чтобы получать напоминания, войди на сайте в свой аккаунт и нажми «🤖 Подключить бота» в трекере.");
   }
   send(res, 200, { ok: true });
 }

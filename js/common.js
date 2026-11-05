@@ -2,8 +2,21 @@
 window.App = window.App || {};
 
 (function (App) {
+  // ---------- account: on the website everyone signs in (login + password); opened from a file, the app works without one.
+  // {token, uid, login, legacy} — "legacy" is the account that owns progress saved before accounts existed.
+  const SESSION_KEY = "vocab.session";
+  App.online = /^https?:$/.test(location.protocol);
+  try { App.session = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch (e) { App.session = null; }
+  App.needLogin = App.online && !(App.session && App.session.token);
+  App.saveSession = (s) => {
+    try { s ? localStorage.setItem(SESSION_KEY, JSON.stringify(s)) : localStorage.removeItem(SESSION_KEY); } catch (e) { /* private mode */ }
+    App.session = s;
+  };
+
   // ---------- storage (localStorage can throw in private mode — never let it break the page)
-  const PREFIX = "vocab.";
+  // Each account keeps its own copy in this browser: the legacy account (and the offline file) under "vocab.",
+  // others under "vocab.u.<uid>.", and nothing worth keeping before sign-in.
+  const PREFIX = App.needLogin ? "vocab.guest." : App.session && !App.session.legacy ? `vocab.u.${App.session.uid}.` : "vocab.";
   const memory = {};
   App.store = {
     get(key, fallback) {

@@ -352,3 +352,9 @@ code { font-size: .85em; background: var(--surface-2); border-radius: 4px; paddi
   .big { font-size: 1.45rem; }
   .answer-row { flex-direction: column; }
 }
+
+/* ---------- sign-in */
+.login { max-width: 360px; margin: 24px auto; }
+.login form { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
+.login .field { width: 100%; box-sizing: border-box; }
+.account-row { align-items: center; }

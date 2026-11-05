@@ -1,6 +1,6 @@
 // POST /api/voice?level=C1&cat=...&secs=134&topic=...&q=...   body: the recording (audio/ogg, audio/mp4 or audio/webm)
-// (sync key or Mini App) — sends the "Speak off the cuff" recording to the learner's Telegram chat.
-const { redis, KEY_CUFF_REMIND, cuffDoneKey, today, checkAuth, ownerId, send, handle, httpError, query } = require("./_lib");
+// (signed in) — sends the "Speak off the cuff" recording to the account's Telegram chat.
+const { redis, uk, cuffDoneKey, today, checkAuth, chatOf, send, handle, httpError, query } = require("./_lib");
 
 const MAX_BYTES = 4 * 1024 * 1024; // Vercel functions accept request bodies up to 4.5 MB
 
@@ -21,10 +21,10 @@ const mmss = (secs) => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2,
 
 module.exports = handle(async (req, res) => {
   if (req.method !== "POST") throw httpError(405, "Method not allowed");
-  await checkAuth(req);
+  const uid = await checkAuth(req);
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw httpError(500, "На сервере не задан TELEGRAM_BOT_TOKEN");
-  const chat = await ownerId();
+  const chat = await chatOf(uid);
   if (!chat) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в трекере");
 
   const audio = await readRaw(req);
@@ -60,9 +60,9 @@ module.exports = handle(async (req, res) => {
   if (!data.ok) throw httpError(502, "Telegram: " + (data.description || "ошибка"));
   // Practised today → today's reminder (api/cuff-remind.js) isn't needed. Best effort: the voice is already sent.
   try {
-    const raw = await redis("GET", KEY_CUFF_REMIND);
+    const raw = await redis("GET", uk(uid, "cuff_remind"));
     const tz = (raw && JSON.parse(raw).tz) || undefined;
-    await redis("SET", cuffDoneKey(today(tz)), "1", "EX", 2 * 86400);
+    await redis("SET", cuffDoneKey(uid, today(tz)), "1", "EX", 2 * 86400);
   } catch (e) { /* storage not connected — fine */ }
   send(res, 200, { ok: true });
 });
