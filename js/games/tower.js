@@ -77,7 +77,7 @@
           <span id="t-hp"></span>
           <span id="t-score"></span>
         </div>
-        <div class="field" id="field">
+        <div class="tower-field" id="field">
           ${room.players.length === 2 ? `<div class="lane-mark l0">${esc(room.players[0].login)}</div><div class="lane-mark l1">${esc(room.players[1].login)}</div><div class="lane-split"></div>` : ""}
           <div class="banner" id="banner"></div>
           <div class="castle">🏰</div>
