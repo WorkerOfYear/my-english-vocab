@@ -1,4 +1,4 @@
-// Rooms for co-op mini-games (js/games/tower.js). Both phones simulate the same game from a shared seed;
+// Rooms for co-op mini-games (js/games/coop.js: tower.js, bomb.js). Both phones simulate the same game from a shared seed;
 // the server only keeps the room (players, their words, the seed, the start time) and the list of events
 // ("monster 12 killed by artem"), stamped with the server's clock so everyone agrees on what happened first.
 //   GET  /api/game?list=1                                     → {rooms}          open rooms anyone can join
@@ -6,7 +6,7 @@
 //   POST /api/game?join=CODE         body {words}             → {room}
 //   POST /api/game?start=CODE        (host)                   → {room}           start in 3 s with a new seed
 //   POST /api/game?leave=CODE                                → {ok}
-//   POST /api/game?event=CODE        body {type, id, part}    → {ok, ts}
+//   POST /api/game?event=CODE        body {type, id, part, text, n} → {ok, ts}   n — the client's id for its own event
 //   GET  /api/game?room=CODE&since=N                          → {room, events: [...from N], now}
 // A room lives 3 hours. words: [{en, ru}] — up to 120 words from the player's own dictionary.
 const crypto = require("crypto");
@@ -15,7 +15,8 @@ const { redis, checkAuth, getAccount, readJson, send, handle, httpError, query }
 const TTL = 3 * 3600;
 const roomKey = (code) => `vocab:game:${code}`;
 const eventsKey = (code, round) => `vocab:game:${code}:ev:${round}`;
-const GAMES = ["tower"];
+const GAMES = ["tower", "bomb"];
+const EVENTS = ["kill", "hit", "cut", "code", "press", "end"];
 const MAX_PLAYERS = 2;
 const KEY_ROOMS = "vocab:game:rooms"; // codes of rooms shown in the list (solo games aren't)
 
@@ -133,9 +134,11 @@ module.exports = handle(async (req, res) => {
     const room = await loadRoom(q.get("event"));
     if (!room.players.some((p) => p.uid === uid)) throw httpError(403, "Ты не в этой комнате");
     if (room.status !== "playing") throw httpError(409, "Игра не идёт");
-    const type = ["kill", "hit", "end"].includes(body.type) ? body.type : null;
+    const type = EVENTS.includes(body.type) ? body.type : null;
     if (!type) throw httpError(400, "Неизвестное событие");
     const ev = { type, id: Number(body.id) || 0, part: Number(body.part) || 0, by: uid, ts: now };
+    if (body.text !== undefined) ev.text = String(body.text).slice(0, 40);
+    if (body.n !== undefined) ev.n = String(body.n).slice(0, 20);
     if (type === "end") {
       room.status = "lobby";
       room.last = { round: room.round, result: body.result === "win" ? "win" : "lose" };
