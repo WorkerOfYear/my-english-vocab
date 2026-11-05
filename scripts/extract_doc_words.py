@@ -11,6 +11,9 @@ don't fit that shape and are skipped.
 
 Writes data/words-<uid>.json and js/words-<uid>.js: that account's own dictionary (see index.html).
 Manual fixes: data/overrides-<uid>.json, same format as data/overrides.json.
+Example sentences (written by Claude, the doc has none): data/examples-<uid>.json, {"word": "sentence"}.
+If the word can't be found in its sentence automatically (irregular forms: shake → shook), the part to blank out
+in "Вставь слово" is marked with brackets: "She [shook her head] and said no."
 """
 import json
 import os
@@ -20,7 +23,7 @@ import unicodedata
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from extract_words import norm  # same dedup key as the site (App.norm)
+from extract_words import norm, find_cloze  # same dedup key as the site (App.norm)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -68,6 +71,17 @@ def parse_line(line):
     return en, ipa, re.sub(r"\s+", " ", ru)
 
 
+def merge_ru(a, b):
+    """'заключение' + 'заключение, вывод' → 'заключение, вывод'; different meanings are joined with '; '."""
+    parts = []
+    for p in [x.strip() for x in (a + ";" + b).split(";") if x.strip()]:
+        if any(p.lower() in q.lower() for q in parts):
+            continue
+        parts = [q for q in parts if q.lower() not in p.lower()] + [p]
+    out = "; ".join(parts)
+    return out if len(out) <= 150 else a
+
+
 def extract(text):
     words, order = {}, []
     date, source = None, "tutor"
@@ -92,11 +106,7 @@ def extract(text):
         key = norm(en)
         if key in words:
             w = words[key]
-            old = [x.strip() for x in w["ru"].split(";")]
-            if any(x.lower() in ru.lower() for x in old):  # "заключение" + "заключение, вывод" → the fuller one
-                w["ru"] = "; ".join([x for x in old if x.lower() not in ru.lower()] + [ru])
-            elif ru.lower() not in w["ru"].lower() and len(w["ru"]) + len(ru) < 120:
-                w["ru"] += "; " + ru
+            w["ru"] = merge_ru(w["ru"], ru)
             w["ipa"] = w["ipa"] or ipa
             if date < w["date"]:  # the doc is newest first: keep the date it first came up
                 w["date"], w["source"] = date, source
@@ -119,16 +129,57 @@ def apply_overrides(words, uid):
         if o:
             w.update({k: v for k, v in o.items() if k != "skip"})
         out.append(w)
-    return out
+    # A fixed typo can turn into a word that is already there ("sing" → "sign"): keep one, with both meanings.
+    merged = {}
+    for w in out:
+        key = norm(w["en"])
+        if key not in merged:
+            merged[key] = w
+            continue
+        m = merged[key]
+        m["ru"] = merge_ru(m["ru"], w["ru"])
+        m["date"] = min(m["date"], w["date"])
+    return list(merged.values())
+
+
+def cloze_for(en, example):
+    """(sentence, the piece of it to blank out). Brackets in the sentence mark that piece by hand."""
+    if "[" in example:
+        # one span, or a split phrase: "[called] their son [after]" → blank "called their son after"
+        start, end = example.index("["), example.rindex("]")
+        piece = example[start:end + 1].replace("[", "").replace("]", "")
+        return example.replace("[", "").replace("]", ""), piece
+    found = find_cloze(en, example)
+    if found:
+        return example, found
+    # "remember to V", "stop V-ing", "get + V3": the grammar slot is any word; "a / b": try each variant.
+    base = re.sub(r"\b(V-ing|V3|V)\b|\s\+\s", " smth ", re.sub(r"\([^)]*\)", " ", en))
+    for variant in re.split(r"\s*/\s*", base):
+        found = variant.strip() and find_cloze(variant.strip(), example)
+        if found:
+            return example, found
+    return example, ""
+
+
+def apply_examples(words, uid):
+    path = os.path.join(ROOT, "data", f"examples-{uid}.json")
+    extra = json.load(open(path, encoding="utf-8")) if os.path.exists(path) else {}
+    extra = {norm(k): v for k, v in extra.items()}
+    for w in words:
+        ex = extra.get(norm(w["en"]))
+        if ex:
+            w["example"], w["cloze"] = cloze_for(w["en"], ex)
+            w["exampleBy"] = "claude"
+        else:
+            w.update(example="", exampleBy="", cloze="")
+    return words
 
 
 def main():
     if len(sys.argv) != 3 or not re.fullmatch(r"[a-z0-9_.-]+", sys.argv[1]):
         sys.exit(__doc__)
     uid, src = sys.argv[1], sys.argv[2]
-    words = apply_overrides(extract(read_doc(src)), uid)
-    for w in words:
-        w.update(exampleBy="", cloze="")
+    words = apply_examples(apply_overrides(extract(read_doc(src)), uid), uid)
     words.sort(key=lambda w: w["date"])
     with open(os.path.join(ROOT, "data", f"words-{uid}.json"), "w", encoding="utf-8") as f:
         json.dump(words, f, ensure_ascii=False, indent=1)
@@ -137,7 +188,11 @@ def main():
         f.write("window.WORDS = " + json.dumps(words, ensure_ascii=False) + ";\n")
     print(f"{len(words)} words for {uid} "
           f"({sum(w['source'] == 'tutor' for w in words)} from lessons, {sum(w['source'] == 'homework' for w in words)} from homework), "
-          f"{words[0]['date']} .. {words[-1]['date']}")
+          f"{words[0]['date']} .. {words[-1]['date']}; "
+          f"{sum(bool(w['example']) for w in words)} with examples, {sum(bool(w['cloze']) for w in words)} playable in cloze")
+    nocloze = [w["en"] for w in words if w["example"] and not w["cloze"]]
+    if nocloze:
+        print("Word not found in its example (mark it with [brackets]): " + ", ".join(nocloze))
 
 
 if __name__ == "__main__":

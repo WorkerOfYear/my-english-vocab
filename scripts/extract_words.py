@@ -239,7 +239,7 @@ def apply_examples(words):
     return words
 
 
-PLACEHOLDER = {"someone", "somebody", "something", "smb", "smth", "sb", "sth", "one's", "one’s", "someone's", "your", "my", "doing"}
+PLACEHOLDER = {"someone", "somebody", "something", "smb", "smd", "smth", "sb", "sth", "one's", "one’s", "someone's", "your", "my", "doing"}
 
 
 def find_cloze(en, example):
