@@ -362,3 +362,5 @@ code { font-size: .85em; background: var(--surface-2); border-radius: 4px; paddi
 table.users { width: 100%; border-collapse: collapse; }
 table.users td { padding: 6px 4px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 table.users td:last-child { text-align: right; }
+.login-accounts { margin: 0; }
+.login-accounts .chip { font-size: 1rem; padding: 10px 18px; }

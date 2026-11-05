@@ -1,4 +1,5 @@
 // Accounts: each one has its own progress, settings and Telegram chat (see api/_lib.js).
+//   GET  /api/auth?logins=1        (public) → {logins: ["Angel", "Artem"]} — for the sign-in screen
 //   POST /api/auth                 body {login, password} → {token, uid, login, legacy, admin}
 //                                  Sent from the Telegram Mini App (x-telegram-init-data) it also binds that Telegram
 //                                  to the account, if the Telegram isn't bound to any account yet.
@@ -20,6 +21,15 @@ const isWrite = (req) => req.method === "PUT" || req.method === "POST";
 module.exports = handle(async (req, res) => {
   const q = query(req);
   const init = req.headers["x-telegram-init-data"];
+
+  if (q.get("logins") === "1" && req.method === "GET") {
+    const logins = [];
+    for (const uid of await listUsers()) {
+      const acc = await getAccount(uid);
+      if (acc) logins.push(acc.login || uid);
+    }
+    return send(res, 200, { logins: logins.sort((a, b) => a.localeCompare(b)) });
+  }
 
   if (q.get("users") === "1") {
     await checkAdmin(req);

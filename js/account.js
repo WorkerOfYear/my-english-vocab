@@ -32,22 +32,53 @@
     title: "Вход",
     noFilter: true,
     render(root) {
+      // Pick your name from the list of accounts, then type the password. The last choice is remembered.
+      const LAST = "vocab.lastLogin";
+      let last = "";
+      try { last = localStorage.getItem(LAST) || ""; } catch (e) { /* private mode */ }
       root.innerHTML = `<div class="card login">
-        <h3>👤 Войди в свой аккаунт</h3>
-        <p class="muted small">У каждого аккаунта свой прогресс, свои слова и свои напоминания в Telegram.</p>
+        <h3>👤 Кто входит?</h3>
         <form id="login-form">
-          <input class="field" id="login" placeholder="Логин" autocomplete="username" autocapitalize="none" required>
+          <div class="row chips login-accounts" id="accounts" role="radiogroup" aria-label="Аккаунт"><span class="muted small">⏳ Загружаю аккаунты…</span></div>
+          <input class="field" id="login" placeholder="Логин" autocomplete="username" autocapitalize="none" hidden>
           <input class="field" id="password" type="password" placeholder="Пароль" autocomplete="current-password" required>
           <button class="btn primary wide">Войти</button>
         </form>
         <p class="small" id="login-msg">${App.tg ? "⏳ Проверяю Telegram…" : ""}</p>
       </div>`;
-      const msg = (t) => { root.querySelector("#login-msg").textContent = t; };
-      root.querySelector("#login-form").onsubmit = async (e) => {
+      const $ = (sel) => root.querySelector(sel);
+      const msg = (t) => { $("#login-msg").textContent = t; };
+      const choose = (login) => {
+        $("#login").value = login;
+        root.querySelectorAll("[data-login]").forEach((b) => {
+          b.classList.toggle("on", b.dataset.login === login);
+          b.setAttribute("aria-checked", b.dataset.login === login);
+        });
+        $("#password").focus();
+      };
+      fetch("/api/auth?logins=1").then((r) => r.json()).then(({ logins }) => {
+        if (!logins || !logins.length) throw new Error("no accounts");
+        $("#accounts").innerHTML = logins.map((l) =>
+          `<button type="button" class="chip" role="radio" aria-checked="false" data-login="${App.esc(l)}">${App.esc(l)}</button>`).join("");
+        root.querySelectorAll("[data-login]").forEach((b) => b.onclick = () => choose(b.dataset.login));
+        const pre = logins.find((l) => l.toLowerCase() === last.toLowerCase()) || (logins.length === 1 ? logins[0] : "");
+        if (pre) choose(pre);
+      }).catch(() => {
+        // No list (server unreachable) — type the login by hand.
+        $("#accounts").hidden = true;
+        $("#login").hidden = false;
+        $("#login").value = last;
+      });
+      $("#login-form").onsubmit = async (e) => {
         e.preventDefault();
+        const login = $("#login").value.trim();
+        if (!login) return msg("Выбери аккаунт");
         msg("⏳ Вхожу…");
-        try { signedIn(await post("/api/auth", { login: root.querySelector("#login").value, password: root.querySelector("#password").value })); }
-        catch (err) { msg("⚠️ " + err.message); }
+        try {
+          const s = await post("/api/auth", { login, password: $("#password").value });
+          try { localStorage.setItem(LAST, s.login); } catch (err) { /* private mode */ }
+          signedIn(s);
+        } catch (err) { msg("⚠️ " + err.message); }
       };
       // Inside Telegram: a bound Telegram signs in by itself.
       if (App.tg) {
