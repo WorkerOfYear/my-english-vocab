@@ -96,7 +96,8 @@
       }
       const api = (path, method = "GET", body) => App.sync.api(path, { method, noLogout: method !== "GET", body: body && JSON.stringify(body) });
       const me = App.session.uid;
-      let room = null, code = App.store.get("towerRoom", ""), err = "", joinCode = "";
+      let room = null, code = App.store.get("towerRoom", ""), err = "";
+      let rooms = null; // open rooms to join (null — still loading)
       let pollTimer = null, raf = 0, alive = true;
       let game = null; // running round
       let view = "lobby"; // "lobby" | "game" | "results" — lobby polling redraws only the lobby
@@ -115,28 +116,30 @@
               Выстойте вместе 5 волн!</p>
             </div>
             <div class="card">
+              <h3>Комнаты</h3>
+              ${rooms === null ? `<p class="muted small">⏳ Ищу комнаты…</p>`
+                : rooms.length ? rooms.map((r) => `<div class="room-row">
+                    <div><b>Комната ${esc(r.host)}</b><div class="muted small">${r.players.map(esc).join(", ")} · ${r.players.length}/2${r.status === "playing" ? " · идёт игра" : ""}</div></div>
+                    <button class="btn${r.status === "playing" && !r.mine ? "" : " primary"}" data-join="${esc(r.code)}" ${r.status === "playing" && !r.mine ? "disabled" : ""}>${r.mine ? "Вернуться" : "Войти"}</button>
+                  </div>`).join("")
+                : `<p class="muted small">Открытых комнат пока нет — создай свою, и напарник увидит её здесь.</p>`}
               <button class="btn primary wide" id="create">👥 Создать комнату</button>
-              <form class="row" id="join-form">
-                <input class="field code-input" id="code" maxlength="4" placeholder="КОД" autocapitalize="characters" autocomplete="off" value="${esc(joinCode)}">
-                <button class="btn">Войти по коду</button>
-              </form>
               <button class="btn wide" id="solo">🧍 Играть одному</button>
               ${err ? `<p class="note">${esc(err)}</p>` : ""}
             </div>`;
           root.querySelector("#create").onclick = () => create(false);
           root.querySelector("#solo").onclick = () => create(true);
-          root.querySelector("#code").oninput = (e) => { joinCode = e.target.value.toUpperCase().replace(/[^A-Z]/g, ""); e.target.value = joinCode; };
-          root.querySelector("#join-form").onsubmit = (e) => { e.preventDefault(); join(joinCode); };
+          root.querySelectorAll("[data-join]").forEach((b) => b.onclick = () => { b.disabled = true; join(b.dataset.join); });
           return;
         }
         const host = room.players.find((p) => p.uid === room.host);
         const isHost = room.host === me;
         const last = room.last && room.last.round === room.round ? room.last : null;
         root.innerHTML = `<div class="card center">
-            <p class="muted small">Код комнаты — скажи его напарнику</p>
-            <div class="room-code">${esc(room.code)}</div>
+            <h3>Комната ${esc(host ? host.login : "")}</h3>
             <div class="players">${room.players.map((p, i) => `<span class="player p${i}">${i ? "🛡️" : "⚔️"} ${esc(p.login)}${p.uid === room.host ? " · хост" : ""}</span>`).join("")}
               ${room.players.length < 2 ? `<span class="player waiting">⏳ ждём напарника…</span>` : ""}</div>
+            ${room.players.length < 2 ? `<p class="muted small">Напарник увидит комнату в списке и сможет войти.</p>` : ""}
             ${last ? `<p>${last.result === "win" ? "🏆 Прошлый раунд — победа!" : "💀 Прошлый раунд башня пала."}</p>` : ""}
             ${isHost ? `<button class="btn primary wide" id="start">▶️ ${room.round ? "Сыграть ещё раз" : "Начать"}${room.players.length < 2 ? " (одному)" : ""}</button>`
               : `<p class="muted">Ждём, пока ${esc(host ? host.login : "хост")} начнёт…</p>`}
@@ -151,26 +154,36 @@
         };
         root.querySelector("#leave").onclick = async () => {
           try { await api(`/api/game?leave=${room.code}`, "POST", {}); } catch (e) { /* the room is gone anyway */ }
-          setRoom(null); stop(); drawLobby();
+          setRoom(null); stop(); drawLobby(); pollRooms();
         };
+      }
+
+      // The list of open rooms refreshes by itself, so the partner's new room just shows up.
+      async function pollRooms() {
+        clearTimeout(pollTimer);
+        if (!alive || room || game) return;
+        try { rooms = (await api("/api/game?list=1")).rooms.filter((r) => r.game === "tower"); } catch (e) { /* try again */ }
+        if (view === "lobby" && !room) drawLobby();
+        pollTimer = setTimeout(pollRooms, LOBBY_POLL);
       }
 
       async function create(solo) {
         err = "";
         try {
-          setRoom((await api("/api/game?create=1", "POST", { game: "tower", words: myWords() })).room);
+          setRoom((await api("/api/game?create=1", "POST", { game: "tower", words: myWords(), solo })).room);
           if (solo) setRoom((await api(`/api/game?start=${room.code}`, "POST", {})).room);
         } catch (e) { err = e.message; }
-        room && room.status === "playing" ? beginRound() : (drawLobby(), pollLobby());
+        room && room.status === "playing" ? beginRound() : (drawLobby(), room ? pollLobby() : pollRooms());
       }
 
       async function join(c) {
         err = "";
-        if (!/^[A-Z]{4}$/.test(c)) { err = "Код — 4 буквы"; return drawLobby(); }
+        clearTimeout(pollTimer);
         try { setRoom((await api(`/api/game?join=${c}`, "POST", { words: myWords() })).room); }
         catch (e) { err = e.message; }
+        if (room && room.status === "playing") return pollLobby(); // back into a running round
         drawLobby();
-        if (room) pollLobby();
+        room ? pollLobby() : pollRooms();
       }
 
       async function pollLobby() {
@@ -180,10 +193,10 @@
           const r = await api(`/api/game?room=${room.code}`);
           setRoom(r.room);
           if (room.status === "playing" && room.players.some((p) => p.uid === me) && Date.now() < room.startAt + 60000) return beginRound();
-          if (!room.players.some((p) => p.uid === me)) { setRoom(null); return drawLobby(); }
+          if (!room.players.some((p) => p.uid === me)) { setRoom(null); drawLobby(); return pollRooms(); }
           if (view === "lobby") drawLobby();
         } catch (e) {
-          if (e.status === 404) { setRoom(null); err = "Комната закрылась"; if (view === "lobby") drawLobby(); return; }
+          if (e.status === 404) { setRoom(null); err = "Комната закрылась"; if (view === "lobby") { drawLobby(); pollRooms(); } return; }
         }
         pollTimer = setTimeout(pollLobby, LOBBY_POLL);
       }
@@ -329,7 +342,7 @@
             }
           }
           setRoom(r.room);
-          if (!r.room.players.some((p) => p.uid === me)) { game = null; setRoom(null); stop(); return drawLobby(); }
+          if (!r.room.players.some((p) => p.uid === me)) { game = null; setRoom(null); stop(); drawLobby(); return pollRooms(); }
         } catch (e) { /* a missed poll is fine — the next one catches up */ }
         if (game && !game.over) pollTimer = setTimeout(pollGame, GAME_POLL);
       }
@@ -445,10 +458,10 @@
         api(`/api/game?room=${code}`).then((r) => {
           setRoom(r.room.players.some((p) => p.uid === me) ? r.room : null);
           drawLobby();
-          if (room) pollLobby();
-        }).catch(() => { setRoom(null); drawLobby(); });
+          room ? pollLobby() : pollRooms();
+        }).catch(() => { setRoom(null); drawLobby(); pollRooms(); });
         root.innerHTML = `<p class="muted center">⏳ Загружаю комнату…</p>`;
-      } else drawLobby();
+      } else { drawLobby(); pollRooms(); }
 
       return () => {
         alive = false;

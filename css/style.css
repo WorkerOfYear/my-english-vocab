@@ -384,8 +384,8 @@ details.bulk[open] > summary { margin-bottom: 8px; }
 
 /* ---------- 🏰 tower defence */
 .tower-intro { text-align: center; }
-.code-input { width: 7em; text-transform: uppercase; letter-spacing: .25em; text-align: center; font-weight: 700; }
-.room-code { font-size: 2.6rem; font-weight: 800; letter-spacing: .3em; margin: 4px 0 12px; }
+.room-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.room-row:last-of-type { margin-bottom: 8px; }
 .players { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0 12px; }
 .player { padding: 6px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); }
 .player.p0 { border-color: #e8590c; }
