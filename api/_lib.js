@@ -273,8 +273,8 @@ const words = (n) => `${n} ${plural(n, "слово", "слова", "слов")}`
 function reminderText(due, { test = false } = {}) {
   const n = due.length;
   if (!n) return test ? "✅ Бот подключён. Сейчас повторять нечего — напомню, когда подойдёт срок." : "";
-  const list = due.slice(0, 8).join(", ") + (n > 8 ? ` и ещё ${n - 8}` : "");
-  return `${test ? "✅ Бот подключён.\n\n" : ""}🗓️ Пора повторить ${words(n)}\n\n${list}`;
+  // Just the count — the words themselves are in the app (the quote follows, see sendReminder).
+  return `${test ? "✅ Бот подключён.\n\n" : ""}🗓️ Пора повторить ${words(n)}`;
 }
 
 // ---------- a meme "Jason Statham quote" at the end of every reminder (api/_quotes.json: [text, has swearing])
