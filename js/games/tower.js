@@ -10,6 +10,7 @@
 (function (App) {
   const { esc } = App;
   const WAVES = 5, HP = 10, GRACE = 1500, BREAK = 4000;
+  const DECK = 120; // words each player brings to a round (about half of them come up)
   const MONSTERS = ["👾", "👹", "👻", "🧟", "🦇", "🐙", "👺", "🕷️"];
   const LOBBY_POLL = 1500, GAME_POLL = 800;
 
@@ -74,14 +75,35 @@
       if (s.length > 34) s = s.split(",")[0].trim();
       return s.slice(0, 50);
     };
-    const pick = [];
+    // Every suitable word, in order of preference: what's being learned, hard words, the period filter, the rest.
+    const order = [];
     const seen = new Set();
-    const add = (w) => { if (ok(w) && !seen.has(w.en)) { seen.add(w.en); pick.push({ en: w.en, ru: short(w.ru) }); } };
+    const add = (w) => { if (ok(w) && !seen.has(w.en)) { seen.add(w.en); order.push(w); } };
     for (const g of App.srs.activeGroups().concat(App.srs.completedGroups())) for (const en of App.srs.groupWords(g)) add(App.byEn.get(en));
     Object.keys(App.hard).forEach((en) => add(App.byEn.get(en)));
-    App.shuffle(App.filtered()).forEach((w) => { if (pick.length < 120) add(w); });
-    if (pick.length < 120) App.shuffle(App.ALL).forEach((w) => { if (pick.length < 120) add(w); });
-    return App.shuffle(pick.slice(0, 120));
+    App.shuffle(App.filtered()).forEach(add);
+    App.shuffle(App.ALL).forEach(add);
+    // Words already met in earlier games wait until all the others have been met too; then a new lap starts.
+    const used = usedWords();
+    let pick = order.filter((w) => !used.set.has(w.en)).slice(0, DECK);
+    if (pick.length < DECK) {
+      saveUsed({ lap: used.lap + 1, words: [] });
+      const taken = new Set(pick.map((w) => w.en));
+      pick = pick.concat(order.filter((w) => !taken.has(w.en)).slice(0, DECK - pick.length));
+    }
+    return App.shuffle(pick).map((w) => ({ en: w.en, ru: short(w.ru) }));
+  }
+
+  // {lap, words: [en]} — synced between devices with the rest of the progress (js/sync.js).
+  function usedWords() {
+    const u = App.store.get("towerUsed", null) || { lap: 0, words: [] };
+    return { lap: u.lap || 0, words: u.words || [], set: new Set(u.words || []) };
+  }
+  const saveUsed = (u) => App.store.set("towerUsed", { lap: u.lap, words: u.words });
+  function markUsed(list) {
+    const u = usedWords();
+    const fresh = list.filter((en) => !u.set.has(en));
+    if (fresh.length) saveUsed({ lap: u.lap, words: u.words.concat(fresh) });
   }
 
   // ---------- page
@@ -416,9 +438,20 @@
         raf = requestAnimationFrame(frame);
       }
 
+      // My words that have come up in this round count as used (see myWords).
+      function rememberUsed() {
+        if (!game || game.usedSaved) return;
+        game.usedSaved = true;
+        const t = now();
+        const mine = [];
+        for (const m of game.sched.list) if (m.spawn <= t) m.words.forEach((w) => { if (w.owner === me) mine.push(w.en); });
+        markUsed(mine);
+      }
+
       function finish(result) {
         game.over = result;
         stop();
+        rememberUsed();
         if (room.host === me) api(`/api/game?event=${room.code}`, "POST", { type: "end", result }).catch(() => {});
         // Let late hits from the other phone arrive before showing the scores.
         setTimeout(() => { if (alive) results(result); }, 900);
@@ -465,6 +498,7 @@
 
       return () => {
         alive = false;
+        if (game && !game.over) rememberUsed();
         stop();
         window.removeEventListener("resize", onResize);
         if (window.visualViewport) window.visualViewport.removeEventListener("resize", onResize);

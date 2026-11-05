@@ -1,7 +1,7 @@
 // Sync progress (tracker, hard words, added words) of the signed-in account through /api/state so the phone and
 // the computer see the same thing, and so the server can send Telegram reminders. Works only on the deployed site.
 (function (App) {
-  const SYNCED = ["srs", "hard", "custom", "grammar"];
+  const SYNCED = ["srs", "hard", "custom", "grammar", "towerUsed"];
   const online = App.online;
   const token = () => (App.session && App.session.token) || "";
   const meta = Object.assign({ syncedAt: 0, dirty: false, lastOk: 0, error: "" }, App.store.get("syncMeta", {}));
@@ -47,7 +47,14 @@
     return data;
   }
 
-  const local = () => ({ srs: App.store.get("srs", {}), hard: App.hard, custom: App.custom, grammar: App.store.get("grammar", {}) });
+  const local = () => ({ srs: App.store.get("srs", {}), hard: App.hard, custom: App.custom, grammar: App.store.get("grammar", {}),
+    towerUsed: App.store.get("towerUsed", null) });
+  function mergeUsed(a, b) {
+    if (!a || !b) return a || b || null;
+    if ((a.lap || 0) !== (b.lap || 0)) return (a.lap || 0) > (b.lap || 0) ? a : b;
+    return { lap: a.lap || 0, words: [...new Set([...(a.words || []), ...(b.words || [])])] };
+  }
+
   // Union of two devices' progress: a card keeps the version with more reviews.
   function merge(a, b) {
     const sa = a.srs || {}, sb = b.srs || {};
@@ -79,6 +86,8 @@
       hard,
       custom: [...custom.values()],
       grammar: { ...gnewer, cur: gnewer.cur || 0, weekOf: gnewer.weekOf || "", rules: grules },
+      // Tower defence: the later lap wins; within one lap, words used on either device are used.
+      towerUsed: mergeUsed(a.towerUsed, b.towerUsed),
     };
   }
 
@@ -89,6 +98,7 @@
       App.store.set("hard", data.hard || {});
       App.store.set("custom", data.custom || []);
       if (data.grammar) App.store.set("grammar", data.grammar);
+      if (data.towerUsed) App.store.set("towerUsed", data.towerUsed);
     } finally {
       applying = false;
     }
