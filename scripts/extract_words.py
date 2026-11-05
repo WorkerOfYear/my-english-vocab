@@ -174,6 +174,11 @@ def extract(msgs, tutor):
                 if last is not None and ex and not last["example"]:
                     last["example"] = ex
                 continue
+            # Newer format (since autumn 2026): "📎 word /ipa/", then "— English definition", then "✅ example".
+            if last is not None and re.match(r"^[—–-]\s*\S", line) and not CYR.search(line):
+                if not last["ru"] and not last["def"]:
+                    last["def"] = clean(re.sub(r"^[—–-]\s*", "", line))
+                continue
             parsed = parse_word_line(line)
             if not parsed:
                 last = None

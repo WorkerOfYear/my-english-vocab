@@ -3051,5 +3051,9 @@
  },
  "armful": {
   "ru": "охапка"
+ },
+ "intension": {
+  "en": "intention",
+  "def": "A plan or aim that you want to achieve; what you intend to do"
  }
 }
