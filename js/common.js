@@ -130,10 +130,12 @@ window.App = window.App || {};
   };
 
   // Example sentence: ✎ from the chat, 💡 written by Claude.
+  // ✎ — from the chat or typed by hand, 💡 — written by Claude, 📗 — picked from a dictionary when adding the word.
+  const EXAMPLE_KIND = { claude: [" ai", "пример от Claude"], dict: [" dict", "пример из словаря"] };
   App.exampleHtml = (w) => {
     if (!w.example) return "";
-    const ai = w.exampleBy === "claude";
-    return `<div class="example${ai ? " ai" : ""}"${ai ? ' title="пример от Claude"' : ' title="пример из переписки"'}>${App.esc(w.example)}</div>`;
+    const [cls, title] = EXAMPLE_KIND[w.exampleBy] || ["", "пример из переписки"];
+    return `<div class="example${cls}" title="${title}">${App.esc(w.example)}</div>`;
   };
 
   // ---------- answer checking

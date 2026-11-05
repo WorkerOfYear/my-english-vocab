@@ -364,3 +364,20 @@ table.users td { padding: 6px 4px; border-bottom: 1px solid var(--border); verti
 table.users td:last-child { text-align: right; }
 .login-accounts { margin: 0; }
 .login-accounts .chip { font-size: 1rem; padding: 10px 18px; }
+.example.dict::before { content: "📗 "; }
+
+/* ---------- add one word */
+#one { display: grid; gap: 6px; }
+#one h3 { margin: 0 0 4px; }
+#one label.small { margin-top: 6px; }
+#one .chips { margin: 2px 0; gap: 6px; }
+.examples { display: grid; gap: 6px; }
+.example-pick {
+  font: inherit; text-align: left; cursor: pointer; color: var(--text);
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px;
+  display: grid; gap: 2px;
+}
+.example-pick.on { border-color: var(--accent); background: var(--accent-soft); }
+.tiny { font-size: .75rem; margin: 4px 0 0; }
+details.bulk > summary { cursor: pointer; font-weight: 600; }
+details.bulk[open] > summary { margin-bottom: 8px; }

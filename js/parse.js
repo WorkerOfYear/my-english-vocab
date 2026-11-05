@@ -63,7 +63,7 @@
     return out;
   };
 
-  const PLACEHOLDER = new Set(["someone", "somebody", "something", "smb", "smth", "sb", "sth", "one's", "someone's", "your", "my", "doing"]);
+  const PLACEHOLDER = new Set(["someone", "somebody", "something", "smb", "smd", "smth", "sb", "sth", "one's", "someone's", "your", "my", "doing"]);
   const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/'/g, "['’]");
 
   // The exact piece of `example` that corresponds to the word ("" if not found).
