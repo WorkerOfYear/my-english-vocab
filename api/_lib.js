@@ -5,6 +5,8 @@ const crypto = require("crypto");
 // Every account has its own progress, settings and Telegram chat. Keys are "vocab:u:<uid>:<name>", except for
 // LEGACY_UID: that account owns everything saved before accounts existed, so its keys stay "vocab:<name>".
 const LEGACY_UID = "artem";
+const ADMIN_UIDS = [LEGACY_UID]; // can create accounts and reset passwords (⚙️ Настройки → Аккаунты)
+const isAdmin = (uid) => ADMIN_UIDS.includes(uid);
 const uk = (uid, name) => (uid === LEGACY_UID ? `vocab:${name}` : `vocab:u:${uid}:${name}`);
 const KEY_USERS = "vocab:users"; // set of uids
 const accountKey = (uid) => `vocab:account:${uid}`; // {login, salt, hash, created}
@@ -114,7 +116,7 @@ async function createSession(uid) {
   const token = crypto.randomBytes(32).toString("hex");
   await redis("SET", sessionKey(token), uid, "EX", SESSION_TTL);
   const acc = await getAccount(uid);
-  return { token, uid, login: (acc && acc.login) || uid, legacy: uid === LEGACY_UID };
+  return { token, uid, login: (acc && acc.login) || uid, legacy: uid === LEGACY_UID, admin: isAdmin(uid) };
 }
 const dropSession = (token) => redis("DEL", sessionKey(token));
 
@@ -155,12 +157,6 @@ const safeEqual = (a, b) => {
   return x.length === y.length && crypto.timingSafeEqual(x, y);
 };
 
-// SYNC_KEY is the admin key now: it can create accounts, and it still opens the legacy account (old devices).
-function checkSyncKey(req) {
-  const expected = process.env.SYNC_KEY;
-  if (!expected) throw httpError(500, "На сервере не задан SYNC_KEY");
-  if (!req.headers["x-sync-key"] || !safeEqual(req.headers["x-sync-key"], expected)) throw httpError(401, "Неверный ключ синхронизации");
-}
 
 // Telegram Mini App launch data, signed with the bot token:
 // https://core.telegram.org/bots/webapps#validating-data-received-via-the-mini-app
@@ -179,18 +175,13 @@ function verifyInitData(initData, maxAgeSec = 7 * 24 * 3600) {
   try { return JSON.parse(params.get("user") || "null"); } catch (e) { return null; }
 }
 
-// Who is calling → uid. A session token (login + password), or, for older clients, the sync key (legacy account)
-// or Mini App launch data of a Telegram user bound to an account.
+// Who is calling → uid. A session token (login + password), or Mini App launch data of a Telegram user bound to an account.
 async function checkAuth(req) {
   const token = req.headers["x-session"];
   if (token) {
     const uid = /^[0-9a-f]{64}$/.test(token) ? await redis("GET", sessionKey(token)) : null;
     if (!uid) throw httpError(401, "Сессия истекла — войди заново");
     return uid;
-  }
-  if (req.headers["x-sync-key"]) {
-    checkSyncKey(req);
-    return LEGACY_UID;
   }
   const init = req.headers["x-telegram-init-data"];
   if (init) {
@@ -203,10 +194,24 @@ async function checkAuth(req) {
   throw httpError(401, "Войди в аккаунт");
 }
 
+async function checkAdmin(req) {
+  const uid = await checkAuth(req);
+  if (!isAdmin(uid)) throw httpError(403, "Это может только администратор");
+  return uid;
+}
+
 // Secret Telegram sends back with every webhook call, so nobody else can post fake updates.
-function webhookSecret() {
-  const base = process.env.WEBHOOK_SECRET || process.env.SYNC_KEY || "";
-  return crypto.createHash("sha256").update("webhook:" + base).digest("hex").slice(0, 48);
+// Kept in Redis, so it doesn't depend on env variables. The first time it is the value the webhook was registered with
+// before (derived from WEBHOOK_SECRET / the old SYNC_KEY), so the bot keeps working; otherwise a random one.
+async function webhookSecret() {
+  const saved = await redis("GET", "vocab:webhook_secret");
+  if (saved) return saved;
+  const base = process.env.WEBHOOK_SECRET || process.env.SYNC_KEY;
+  const secret = base
+    ? crypto.createHash("sha256").update("webhook:" + base).digest("hex").slice(0, 48)
+    : crypto.randomBytes(24).toString("hex");
+  await redis("SET", "vocab:webhook_secret", secret, "NX");
+  return redis("GET", "vocab:webhook_secret");
 }
 
 // ---------- dates in the learner's time zone (due dates are local calendar days)
@@ -244,7 +249,7 @@ async function telegram(method, payload) {
 
 async function chatId(uid) {
   const id = await chatOf(uid);
-  if (!id) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в трекере");
+  if (!id) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в ⚙️ настройках");
   return id;
 }
 
@@ -339,7 +344,7 @@ module.exports = {
   redis, uk, LEGACY_UID, cuffDoneKey, loadState, saveState,
   listUsers, getAccount, createAccount, checkPassword, setPassword, createSession, dropSession,
   linkKey, chatOf, uidByChat, bindChat, chatId,
-  checkSyncKey, checkAuth, verifyInitData, webhookSecret, safeEqual,
+  isAdmin, checkAuth, checkAdmin, verifyInitData, webhookSecret, safeEqual,
   today, dueWords, telegram, quoteLine, quoteSettings, saveQuoteSettings, siteUrl, appButton, words, reminderText, sendReminder,
   readJson, send, handle, httpError, query,
 };

@@ -1,4 +1,4 @@
-// Accounts: the sign-in screen (#login), and the "👤 account" block in the tracker (change password, sign out).
+// Accounts: the sign-in screen (#login) and signing out. Password change and the admin's account list are in ⚙️ (js/settings.js).
 // Each account has its own progress on the server and its own copy in this browser (see App.store in common.js).
 (function (App) {
   const { esc } = App;
@@ -54,38 +54,5 @@
         post("/api/auth?telegram=1").then(signedIn).catch(() => msg("Этот Telegram пока не привязан к аккаунту. Войди один раз — дальше вход будет сам."));
       }
     },
-  };
-
-  // Block for the tracker's "☁️ Синхронизация и Telegram" card.
-  let pwOpen = false, pwMsg = "";
-  App.accountHtml = () => {
-    if (!App.session) return "";
-    return `<div class="row account-row">
-        <span>👤 <b>${esc(App.session.login)}</b></span>
-        <button class="btn small" id="pw-toggle">🔑 Сменить пароль</button>
-        <button class="btn small danger" id="logout">Выйти</button>
-      </div>
-      ${pwOpen ? `<form class="row" id="pw-form">
-        <input class="field" id="pw-old" type="password" placeholder="Текущий пароль" autocomplete="current-password" required style="flex:1;min-width:140px">
-        <input class="field" id="pw-new" type="password" placeholder="Новый пароль" autocomplete="new-password" minlength="4" required style="flex:1;min-width:140px">
-        <button class="btn primary">Сохранить</button>
-      </form>` : ""}
-      ${pwMsg ? `<p class="small">${esc(pwMsg)}</p>` : ""}`;
-  };
-  App.bindAccount = (root, redraw) => {
-    const $ = (s) => root.querySelector(s);
-    if ($("#logout")) $("#logout").onclick = async () => {
-      if (await App.confirm(`Выйти из аккаунта ${App.session.login}? Прогресс сохранён на сервере.`)) App.logout();
-    };
-    if ($("#pw-toggle")) $("#pw-toggle").onclick = () => { pwOpen = !pwOpen; pwMsg = ""; redraw(); };
-    if ($("#pw-form")) $("#pw-form").onsubmit = async (e) => {
-      e.preventDefault();
-      try {
-        await App.sync.api("/api/auth?password=1", { method: "PUT", noLogout: true, body: JSON.stringify({ old: $("#pw-old").value, password: $("#pw-new").value }) });
-        pwOpen = false;
-        pwMsg = "✓ Пароль изменён";
-      } catch (err) { pwMsg = "⚠️ " + err.message; }
-      redraw();
-    };
   };
 })(window.App);

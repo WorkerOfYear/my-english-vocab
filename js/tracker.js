@@ -53,13 +53,6 @@
   App.pages.tracker = {
     title: "Трекер повторений",
     render(root) {
-      const remind = App.Reminder("words", {
-        label: "Напоминать о словах к повторению",
-        note: (r) => "Бот пишет, только если есть слова к повторению." + (r.saved ? "" : " Пока ты не поменяешь настройки, напоминание приходит раз в день около 19:00–20:00 по Новосибирску."),
-      });
-      let remindLoaded = false;
-      let quotes = App.store.get("quotes", { enabled: true, mat: true });
-      let quotesMsg = "";
       function draw() {
         const due = srs.dueWords();
         const active = srs.activeGroups();
@@ -104,17 +97,7 @@
 
           <div class="legend">${STEP_LABELS.map((l, s) => `<span class="pill s${s}">${l}</span>`).join("")}</div>
 
-          ${syncCard()}
-
-          <div class="card">
-            <h3>Прогресс</h3>
-            <p class="muted small">${App.sync.connected ? "Прогресс синхронизируется между устройствами. Резервная копия на всякий случай:" : "Прогресс хранится в этом браузере. Сохраняй резервную копию, чтобы перенести его на другой компьютер."}</p>
-            <div class="row">
-              <button class="btn" id="export">💾 Сохранить в файл</button>
-              <label class="btn">📂 Загрузить из файла<input type="file" id="import" accept=".json" hidden></label>
-              <button class="btn danger" id="reset">Сбросить всё</button>
-            </div>
-          </div>`;
+          <p class="muted small center">Резервная копия, синхронизация и напоминания — в <a href="#settings">⚙️ настройках</a>.</p>`;
 
         root.querySelector("#batch").onchange = (e) => { srs.setSettings({ batchSize: +e.target.value }); draw(); };
         root.querySelector("#order").onchange = (e) => { srs.setSettings({ order: e.target.value }); draw(); };
@@ -126,90 +109,6 @@
         root.querySelectorAll("[data-remove]").forEach((b) => b.onclick = async () => {
           if (await App.confirm("Удалить группу и её прогресс?")) { srs.removeGroup(+b.dataset.remove); draw(); }
         });
-        root.querySelector("#export").onclick = () => {
-          const blob = new Blob([srs.exportJSON()], { type: "application/json" });
-          const a = document.createElement("a");
-          a.href = URL.createObjectURL(blob);
-          a.download = `english-progress-${App.today()}.json`;
-          a.click();
-          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-        };
-        root.querySelector("#import").onchange = async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          try { srs.importJSON(await file.text()); App.renderFilter(); draw(); App.alert("Прогресс загружен"); }
-          catch (err) { App.alert("Не получилось загрузить: " + err.message); }
-        };
-        root.querySelector("#reset").onclick = async () => {
-          if (await App.confirm("Точно удалить все группы и прогресс повторений?")) { srs.reset(); draw(); }
-        };
-        bindSync();
-      }
-
-      function syncCard() {
-        const sync = App.sync;
-        const head = `<div class="card"><h3>☁️ Синхронизация и Telegram</h3>`;
-        if (!sync.online) {
-          return `${head}<p class="muted small">${esc(sync.status())} Открой сайт на Vercel, чтобы подключить напоминания.</p></div>`;
-        }
-        return `${head}${App.accountHtml()}
-          <p class="small" id="sync-status">${esc(sync.status())}</p>
-          <p class="muted small">Прогресс этого аккаунта одинаковый на всех устройствах: просто войди под тем же логином.</p>
-          <p class="small" id="bot-status">🤖 Проверяю бота…</p>
-          <div class="row">
-            <button class="btn" id="bot-setup">🤖 Подключить бота</button>
-          </div>
-          <p class="small" id="sync-msg"></p>
-          ${wordsRemind()}</div>`;
-      }
-
-      const wordsRemind = () => `<h3 class="section">🔔 Когда напоминать о словах</h3>${remind.html()}
-        <h3 class="section">💬 Цитата Стэтхэма в напоминаниях</h3>
-        <label class="row check"><input type="checkbox" id="q-on" ${quotes.enabled ? "checked" : ""}> Добавлять цитату к каждому напоминанию</label>
-        <label class="row check${quotes.enabled ? "" : " muted"}"><input type="checkbox" id="q-mat" ${quotes.mat ? "checked" : ""} ${quotes.enabled ? "" : "disabled"}> Можно с матом</label>
-        ${quotesMsg ? `<p class="small">${esc(quotesMsg)}</p>` : ""}`;
-
-      async function saveQuotes(patch) {
-        quotes = { ...quotes, ...patch };
-        App.store.set("quotes", quotes);
-        quotesMsg = "⏳ Сохраняю…";
-        draw();
-        try { quotes = (await App.sync.quotes.save(quotes)).quotes; quotesMsg = "✓ Сохранено"; } catch (e) { quotesMsg = "⚠️ " + e.message; }
-        App.store.set("quotes", quotes);
-        draw();
-      }
-
-      function bindSync() {
-        App.bindAccount(root, draw);
-        remind.bind(root, draw);
-        if (!remindLoaded && App.sync.connected) {
-          remindLoaded = true;
-          remind.load(draw);
-          App.sync.quotes.get().then((r) => { quotes = r.quotes; App.store.set("quotes", quotes); draw(); }).catch(() => {});
-        }
-        const qOn = root.querySelector("#q-on"), qMat = root.querySelector("#q-mat");
-        if (qOn) qOn.onchange = (e) => saveQuotes({ enabled: e.target.checked });
-        if (qMat) qMat.onchange = (e) => saveQuotes({ mat: e.target.checked });
-        const $ = (sel) => root.querySelector(sel);
-        const msg = (html) => { const el = $("#sync-msg"); if (el) el.innerHTML = html; };
-        const botStatus = $("#bot-status");
-        if (botStatus) {
-          App.sync.botStatus().then((b) => {
-            botStatus.innerHTML = b.linked
-              ? `🤖 Бот <a href="https://t.me/${esc(b.bot)}" target="_blank" rel="noopener">@${esc(b.bot)}</a> подключён ✓`
-              : `🤖 Бот <b>@${esc(b.bot)}</b> ещё не привязан к этому аккаунту — нажми «Подключить бота»`;
-            if (b.linked) $("#bot-setup").textContent = "🤖 Переподключить бота";
-          }).catch((err) => { botStatus.textContent = "🤖 " + err.message; });
-        }
-        const setup = $("#bot-setup");
-        if (setup) setup.onclick = async () => {
-          msg("⏳ Настраиваю бота…");
-          try {
-            const r = await App.sync.setupBot();
-            msg(`Открой ссылку и нажми <b>Start</b> — бот запомнит, что этот Telegram твой (ссылка работает час):<br>
-              <a class="btn primary" href="${esc(r.link)}" target="_blank" rel="noopener" style="margin-top:8px">Открыть @${esc(r.bot)} в Telegram</a>`);
-          } catch (err) { msg("⚠️ " + esc(err.message)); }
-        };
       }
 
       function nextReviewText() {
@@ -220,12 +119,6 @@
       }
 
       draw();
-      const onSync = () => {
-        const el = root.querySelector("#sync-status");
-        if (el && App.sync.connected) el.textContent = App.sync.status();
-      };
-      document.addEventListener("sync-status", onSync);
-      return () => document.removeEventListener("sync-status", onSync);
     },
   };
 

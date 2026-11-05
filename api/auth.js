@@ -1,25 +1,48 @@
 // Accounts: each one has its own progress, settings and Telegram chat (see api/_lib.js).
-//   POST /api/auth                 body {login, password} → {token, uid, login, legacy}
+//   POST /api/auth                 body {login, password} → {token, uid, login, legacy, admin}
 //                                  Sent from the Telegram Mini App (x-telegram-init-data) it also binds that Telegram
 //                                  to the account, if the Telegram isn't bound to any account yet.
 //   POST /api/auth?telegram=1      (x-telegram-init-data) sign in as the account this Telegram is bound to
-//   GET  /api/auth                 (signed in) → {uid, login}
+//   GET  /api/auth                 (signed in) → {uid, login, admin}
 //   POST /api/auth?logout=1        (signed in) ends this session
-//   PUT  /api/auth?password=1      (signed in) body {old, password} — change the password
-//   POST /api/auth?create=1        (x-sync-key: SYNC_KEY, the admin key) body {login, password} — new account
+//   PUT  /api/auth?password=1      (signed in) body {old, password} — change your own password
+// Admin only (ADMIN_UIDS in api/_lib.js):
+//   GET  /api/auth?users=1         → {users: [{uid, login, telegram, admin}]}
+//   POST /api/auth?create=1        body {login, password} — new account
+//   PUT  /api/auth?reset=1         body {uid, password} — set a new password for an account
 const {
-  checkAuth, checkSyncKey, verifyInitData, checkPassword, setPassword, createAccount, createSession, dropSession,
-  getAccount, uidByChat, bindChat, readJson, send, handle, httpError, query,
+  checkAuth, checkAdmin, isAdmin, verifyInitData, checkPassword, setPassword, createAccount, createSession, dropSession,
+  getAccount, listUsers, chatOf, uidByChat, bindChat, readJson, send, handle, httpError, query,
 } = require("./_lib");
+
+const isWrite = (req) => req.method === "PUT" || req.method === "POST";
 
 module.exports = handle(async (req, res) => {
   const q = query(req);
   const init = req.headers["x-telegram-init-data"];
 
-  if (q.get("create") === "1" && req.method === "POST") {
-    checkSyncKey(req);
+  if (q.get("users") === "1") {
+    await checkAdmin(req);
+    const users = [];
+    for (const uid of await listUsers()) {
+      const acc = await getAccount(uid);
+      users.push({ uid, login: (acc && acc.login) || uid, telegram: !!(await chatOf(uid)), admin: isAdmin(uid) });
+    }
+    users.sort((a, b) => a.login.localeCompare(b.login));
+    return send(res, 200, { users });
+  }
+
+  if (q.get("create") === "1" && isWrite(req)) {
+    await checkAdmin(req);
     const { login, password } = await readJson(req);
     return send(res, 200, { ok: true, uid: await createAccount(login, password) });
+  }
+
+  if (q.get("reset") === "1" && isWrite(req)) {
+    await checkAdmin(req);
+    const { uid, password } = await readJson(req);
+    await setPassword(String(uid || ""), password);
+    return send(res, 200, { ok: true });
   }
 
   if (q.get("telegram") === "1" && req.method === "POST") {
@@ -35,7 +58,7 @@ module.exports = handle(async (req, res) => {
     return send(res, 200, { ok: true });
   }
 
-  if (q.get("password") === "1" && (req.method === "PUT" || req.method === "POST")) {
+  if (q.get("password") === "1" && isWrite(req)) {
     const uid = await checkAuth(req);
     const body = await readJson(req);
     const acc = await getAccount(uid);
@@ -47,7 +70,7 @@ module.exports = handle(async (req, res) => {
   if (req.method === "GET") {
     const uid = await checkAuth(req);
     const acc = await getAccount(uid);
-    return send(res, 200, { uid, login: (acc && acc.login) || uid });
+    return send(res, 200, { uid, login: (acc && acc.login) || uid, admin: isAdmin(uid) });
   }
 
   if (req.method === "POST") {

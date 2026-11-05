@@ -25,7 +25,7 @@ module.exports = handle(async (req, res) => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) throw httpError(500, "На сервере не задан TELEGRAM_BOT_TOKEN");
   const chat = await chatOf(uid);
-  if (!chat) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в трекере");
+  if (!chat) throw httpError(409, "Бот ещё не подключён: нажми «🤖 Подключить бота» в ⚙️ настройках");
 
   const audio = await readRaw(req);
   if (!audio.length) throw httpError(400, "Пустая запись");

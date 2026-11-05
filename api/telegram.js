@@ -6,7 +6,7 @@
 // One bot for every account: each chat is bound to one account, and reminders go to each account's own chat.
 const crypto = require("crypto");
 const {
-  redis, linkKey, loadState, chatOf, uidByChat, bindChat, checkAuth, webhookSecret,
+  redis, linkKey, loadState, chatOf, uidByChat, bindChat, checkAuth, webhookSecret, safeEqual,
   dueWords, telegram, siteUrl, appButton, words, readJson, send, handle, httpError, query,
 } = require("./_lib");
 
@@ -15,7 +15,7 @@ async function setup(req, res) {
   const me = await telegram("getMe");
   await telegram("setWebhook", {
     url: `${siteUrl(req)}/api/telegram`,
-    secret_token: webhookSecret(),
+    secret_token: await webhookSecret(),
     allowed_updates: ["message"],
   });
   await telegram("setChatMenuButton", { menu_button: { type: "web_app", text: "Учить", web_app: { url: `${siteUrl(req)}/` } } });
@@ -46,7 +46,7 @@ async function todayMessage(req, uid) {
 
 async function webhook(req, res) {
   const got = req.headers["x-telegram-bot-api-secret-token"];
-  if (!got || !safeEqual(got, webhookSecret())) throw httpError(401, "bad secret");
+  if (!got || !safeEqual(got, await webhookSecret())) throw httpError(401, "bad secret");
   const update = await readJson(req);
   const msg = update.message;
   if (!msg || !msg.chat || msg.chat.type !== "private") return send(res, 200, { ok: true });
@@ -74,7 +74,7 @@ async function webhook(req, res) {
     const t = await todayMessage(req, uid);
     await reply(t.text, t.button);
   } else {
-    await reply("Это бот для изучения английских слов 🙂 Чтобы получать напоминания, войди на сайте в свой аккаунт и нажми «🤖 Подключить бота» в трекере.");
+    await reply("Это бот для изучения английских слов 🙂 Чтобы получать напоминания, войди на сайте в свой аккаунт и нажми «🤖 Подключить бота» в ⚙️ настройках.");
   }
   send(res, 200, { ok: true });
 }
