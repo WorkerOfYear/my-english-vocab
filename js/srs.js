@@ -7,18 +7,30 @@
 // A correct review moves a word one step up, a mistake sends it back to step 1 (review tomorrow).
 // A group is "consolidated" when all its words reached step 4 (passed the 7-day review) —
 // then the next group can be taken.
+//
+// Auto mode (on by default, settings.auto): every AUTO_DAYS days after the last group was taken the tracker
+// takes AUTO_SIZE new words by itself, newest first. It pauses while AUTO_CAP or more words are being learned.
 (function (App) {
   const INTERVALS = [0, 1, 3, 7, 14, 30]; // days until the next review after reaching step i
   const LEARNED = INTERVALS.length;       // 6
   const CONSOLIDATED = 4;
   const MAX_ACTIVE = 2;
+  const AUTO_SIZE = 20;
+  const AUTO_DAYS = 14;
+  const AUTO_CAP = 200;
 
   const defaults = () => ({
-    settings: { batchSize: 20, order: "old" },
+    settings: { batchSize: 20, order: "old", auto: true },
     groups: [],   // {id, words:[en], createdAt, completedAt}
     cards: {},    // en -> {step, due, reviewed, history:[[date, 0|1]]}
   });
-  let state = Object.assign(defaults(), App.store.get("srs", {}));
+  // Settings saved before a new option existed don't have it — fill in the defaults.
+  const load = (data) => {
+    const st = Object.assign(defaults(), data);
+    st.settings = Object.assign(defaults().settings, st.settings);
+    return st;
+  };
+  let state = load(App.store.get("srs", {}));
   const save = () => App.store.set("srs", state);
 
   const card = (en) => state.cards[en];
@@ -33,7 +45,7 @@
   }
 
   const srs = {
-    INTERVALS, LEARNED, CONSOLIDATED,
+    INTERVALS, LEARNED, CONSOLIDATED, AUTO_SIZE, AUTO_DAYS, AUTO_CAP,
     get settings() { return state.settings; },
     setSettings(patch) { Object.assign(state.settings, patch); save(); },
 
@@ -53,12 +65,40 @@
     isConsolidated(g) { const s = this.groupStats(g); return s.total > 0 && s.consolidated === s.total; },
 
     // Words from the current filter that were never put into a group.
-    candidates() {
+    candidates(order = state.settings.order) {
       const used = new Set(state.groups.flatMap((g) => g.words));
       let list = App.filtered().filter((w) => !used.has(w.en));
-      if (state.settings.order === "new") list = list.slice().reverse();
-      if (state.settings.order === "random") list = App.shuffle(list);
+      if (order === "new") list = list.slice().reverse();
+      if (order === "random") list = App.shuffle(list);
       return list;
+    },
+    // Words being learned right now: in an active group and not learned yet.
+    learningCount() {
+      const out = new Set();
+      for (const g of this.activeGroups()) for (const en of groupWords(g)) if (!isLearned(card(en))) out.add(en);
+      return out.size;
+    },
+    // Auto mode: {on, paused, nextDate, reason}. nextDate — when the next group is due (today or earlier = now).
+    autoStatus() {
+      const on = !!state.settings.auto;
+      // Counted from the last group taken by hand or by auto mode (autoLast — so deleting an auto group doesn't re-take it).
+      const last = state.groups.reduce((d, g) => (g.createdAt > d ? g.createdAt : d), state.settings.autoLast || "");
+      const nextDate = last ? App.addDays(last, AUTO_DAYS) : App.today();
+      const learning = this.learningCount();
+      let reason = "";
+      if (learning >= AUTO_CAP) reason = `Сейчас изучается ${App.words(learning)}, а лимит — ${AUTO_CAP}. Добавление продолжится, когда часть выучится.`;
+      else if (!this.candidates("new").length) reason = "В выбранном периоде не осталось новых слов.";
+      return { on, paused: on && !!reason, nextDate, learning, reason };
+    },
+    // Called on start-up and after each sync: takes one group if it's time. Returns the group or null.
+    autoTake() {
+      const a = this.autoStatus();
+      if (!a.on || a.paused || a.nextDate > App.today()) return null;
+      // Same id for the same day, so two devices taking a group on the same day end up with one group after sync.
+      const id = Date.parse(App.today() + "T00:00:00Z");
+      if (state.groups.some((g) => g.id === id)) return null;
+      state.settings.autoLast = App.today();
+      return this.takeGroup({ id, size: AUTO_SIZE, order: "new", auto: true });
     },
     // Why a new group can't be taken yet ("" if it can).
     blockReason() {
@@ -73,11 +113,12 @@
       }
       return "";
     },
-    takeGroup() {
-      const words = this.candidates().slice(0, state.settings.batchSize).map((w) => w.en);
+    takeGroup(opts = {}) {
+      const words = this.candidates(opts.order).slice(0, opts.size || state.settings.batchSize).map((w) => w.en);
       if (!words.length) return null;
       const today = App.today();
-      const g = { id: Date.now(), words, createdAt: today, completedAt: null };
+      const g = { id: opts.id || Date.now(), words, createdAt: today, completedAt: null };
+      if (opts.auto) g.auto = true;
       state.groups.push(g);
       words.forEach((en) => {
         if (!state.cards[en]) state.cards[en] = { step: 0, due: today, reviewed: null, history: [] };
@@ -148,15 +189,16 @@
     importJSON(text) {
       const data = JSON.parse(text);
       if (!data.srs || !Array.isArray(data.srs.groups)) throw new Error("Это не файл прогресса");
-      state = Object.assign(defaults(), data.srs);
+      state = load(data.srs);
       save();
       if (data.hard) { App.hard = data.hard; App.store.set("hard", App.hard); }
       if (data.filter) App.setFilter(data.filter);
       if (Array.isArray(data.custom)) App.saveCustom(data.custom);
     },
-    reset() { state = defaults(); save(); },
+    // Progress goes, the settings stay (except when auto mode last took a group).
+    reset() { const { autoLast, ...settings } = state.settings; state = load({ settings }); save(); },
     // Re-read after another device's progress was pulled into storage (js/sync.js).
-    reload() { state = Object.assign(defaults(), App.store.get("srs", {})); refreshGroups(); },
+    reload() { state = load(App.store.get("srs", {})); refreshGroups(); },
   };
 
   refreshGroups();

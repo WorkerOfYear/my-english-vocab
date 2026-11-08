@@ -72,6 +72,16 @@
         </div>`;
       }
 
+      function trackerCard() {
+        const a = srs.autoStatus();
+        return `<div class="card"><h3>🗓️ Трекер повторений</h3>
+          <label class="row check"><input type="checkbox" id="auto-take" ${a.on ? "checked" : ""}>
+            Автоматически добавлять ${App.words(srs.AUTO_SIZE)} каждые ${srs.AUTO_DAYS / 7} недели</label>
+          <p class="muted small">Берутся сначала новые слова из выбранного периода (📅). Добавление приостанавливается,
+            пока изучается ${srs.AUTO_CAP} слов или больше.${a.on ? (a.paused ? " ⏸️ Сейчас на паузе: изучается " + App.words(a.learning) + "." : ` Следующие слова: ${a.nextDate <= App.today() ? "сегодня" : App.fmtDate(a.nextDate)}.`) : ""}</p>
+        </div>`;
+      }
+
       function backupCard() {
         return `<div class="card"><h3>💾 Резервная копия прогресса</h3>
           <p class="muted small">${online ? "Прогресс и так хранится на сервере. Копия в файл — на всякий случай:" : "Прогресс хранится в этом браузере. Сохраняй резервную копию, чтобы перенести его на другой компьютер."}</p>
@@ -107,7 +117,7 @@
       }
 
       function draw() {
-        root.innerHTML = accountCard() + syncCard() + telegramCard() + adminCard() + backupCard();
+        root.innerHTML = accountCard() + syncCard() + trackerCard() + telegramCard() + adminCard() + backupCard();
         bind();
       }
 
@@ -173,6 +183,13 @@
             say("admin", `✓ Аккаунт ${esc(login)} создан`);
             loadUsers();
           } catch (err) { say("admin", "⚠️ " + esc(err.message)); }
+        });
+
+        // tracker auto mode
+        on("#auto-take", "onchange", (e) => {
+          srs.setSettings({ auto: e.target.checked });
+          if (e.target.checked) srs.autoTake();
+          draw();
         });
 
         // backup

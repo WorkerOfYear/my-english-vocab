@@ -33,7 +33,7 @@
     return `<details class="group card">
       <summary>
         <div class="group-head">
-          <b>Группа ${srs.groupNumber(g)}</b>
+          <b>Группа ${srs.groupNumber(g)}</b>${g.auto ? ' <span class="badge added" title="Добавлена автоматически">авто</span>' : ""}
           <span class="muted small">${done ? `выучена ${App.fmtDate(g.completedAt)}` : `с ${App.fmtDate(g.createdAt)} · закреплено ${s.consolidated}/${s.total}`}</span>
         </div>
         ${stepBar(s)}
@@ -74,6 +74,8 @@
               через 1, 3, 7, 14 и 30 дней. Когда группа закреплена, открывается следующая.</p>`}
           </div>
 
+          ${autoCard()}
+
           <div class="card">
             <h3>Новая группа слов</h3>
             <p class="muted small">Слова берутся из периода, выбранного в <button class="link" data-open-filter>📅 справа вверху</button> — доступно ещё ${App.words(candidates)}.</p>
@@ -109,6 +111,17 @@
         root.querySelectorAll("[data-remove]").forEach((b) => b.onclick = async () => {
           if (await App.confirm("Удалить группу и её прогресс?")) { srs.removeGroup(+b.dataset.remove); draw(); }
         });
+      }
+
+      function autoCard() {
+        const a = srs.autoStatus();
+        if (!a.on) return `<p class="muted small center">Автодобавление слов выключено — включить можно в <a href="#settings">⚙️ настройках</a>.</p>`;
+        const when = a.nextDate <= App.today() ? "сегодня" : App.fmtDate(a.nextDate);
+        return `<div class="card"><h3>🤖 Автодобавление</h3>
+          <p class="small">Каждые ${srs.AUTO_DAYS / 7} недели трекер сам берёт ${App.words(srs.AUTO_SIZE)}, сначала новые.
+            Сейчас изучается ${App.words(a.learning)} из ${srs.AUTO_CAP} возможных.</p>
+          ${a.paused ? `<p class="note">⏸️ На паузе. ${esc(a.reason)}</p>` : `<p class="small">Следующие слова: <b>${when}</b>.</p>`}
+          <p class="muted small">Выключить можно в <a href="#settings">⚙️ настройках</a>.</p></div>`;
       }
 
       function nextReviewText() {

@@ -136,8 +136,17 @@
     return busy;
   }
 
+  // Tracker auto mode: take the next group of words if it's time (js/srs.js). Signed in — only after the server's
+  // progress has been pulled, so a group another device already took isn't taken again.
+  function autoTake(redraw = true) {
+    if (!App.srs.autoTake() || !redraw) return;
+    const page = (location.hash.slice(1) || "home").split("?")[0];
+    if (["home", "tracker"].includes(page)) App.route();
+  }
+
   const pull = () => run(async () => {
     const doc = await pullInto();
+    autoTake();
     if (meta.dirty || !doc) await pushNow();
   });
 
@@ -206,5 +215,11 @@
   // Old one-tap links with the shared key (#sync=KEY) no longer work — sign in instead.
   if (/^#sync=/.test(location.hash)) history.replaceState(null, "", location.pathname + "#tracker");
   pull();
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pull(); });
+  // Without an account (the site opened from a file) there's nothing to pull: check right away, before the first page draws.
+  const noAccount = () => !online || !token();
+  if (noAccount() && !App.needLogin) autoTake(false);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "visible") return;
+    if (noAccount()) { if (!App.needLogin) autoTake(); } else pull();
+  });
 })(window.App);
