@@ -187,6 +187,7 @@
     back.setAttribute("aria-label", back.title);
     document.querySelector(".filter-wrap").hidden = !!page.noFilter;
     document.getElementById("settings-link").hidden = App.needLogin || name === "settings";
+    document.getElementById("stats-link").hidden = App.needLogin || name === "stats";
     document.title = page === App.pages.home ? "Мой английский" : `${title} · Мой английский`;
     const root = document.getElementById("page");
     root.innerHTML = "";

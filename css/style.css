@@ -461,3 +461,19 @@ details.bulk[open] > summary { margin-bottom: 8px; }
 .order-btn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .code-field { flex: 1; min-width: 0; }
 .manual-order { margin: 6px 0; padding-left: 1.4em; font-weight: 600; }
+
+/* 📊 statistics */
+#stats-link { margin-left: auto; flex: none; }
+#stats-link:not([hidden]) + #settings-link { margin-left: 0; }
+.user-stat.me { border-color: var(--accent); }
+.user-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.user-head .streak { margin-left: auto; font-size: .85rem; }
+.user-stat .nums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 4px; text-align: center; }
+.user-stat .num { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.user-stat .num.learned { color: var(--s6); }
+.stepbar.thin { height: 8px; }
+.weeks-label { margin-top: 12px; }
+.weeks { display: flex; align-items: flex-end; gap: 4px; height: 44px; margin: 4px 0 8px; }
+.weeks .wk { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.weeks .bar { width: 100%; background: var(--accent); opacity: .55; border-radius: 3px 3px 0 0; min-height: 2px; }
+.weeks .now .bar { opacity: 1; }
