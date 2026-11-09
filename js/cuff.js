@@ -1,6 +1,6 @@
 // Speak off the cuff: spin the wheel for a topic, talk about it (2 minutes is the target, stop whenever you like),
 // the recording goes to the Telegram bot. Topics don't repeat until every topic of the chosen level and
-// categories has come up. ⚙️ opens the settings: level, topic categories and a daily reminder in Telegram.
+// categories has come up. Level, topic categories and the Telegram reminder are in ⚙️ settings → 🎙️ (registered below).
 (function (App) {
   const { esc } = App;
   const LEVELS = ["B2", "C1", "C2"];
@@ -19,6 +19,9 @@
       used: s.used || {},
     };
   };
+  const topicsOf = (st) => window.CUFF_TOPICS[st.level].filter((t) => !st.cats.length || st.cats.includes(t.c));
+  const usedOf = (st) => new Set(st.used[st.level] || []);
+  const catsLabel = (st) => (st.cats.length === 1 ? catLabel(st.cats[0]) : st.cats.length ? `${st.cats.length} категории` : "все темы");
   const catLabel = (c) => (CATS.has(c) ? `${CATS.get(c).icon} ${CATS.get(c).name}` : "");
   const mmss = (secs) => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
   const short = (t) => (t.length > 17 ? t.slice(0, 16) + "…" : t);
@@ -49,12 +52,9 @@
       let lapNote = "";
       let rec = null; // { recorder, stream, chunks, started, timer, wake }
       let result = null; // { blob, url, secs, status: "sending" | "sent" | "error" | "local", error }
-      let settings = null; // open settings panel: { before } — the level/categories it was opened with
-      const remind = App.Reminder("cuff", { label: "Напоминать потренироваться", note: "Если в этот день ты уже отправил запись, бот не напомнит." });
 
-      const levelTopics = () => window.CUFF_TOPICS[state.level];
-      const topics = () => levelTopics().filter((t) => !state.cats.length || state.cats.includes(t.c));
-      const usedSet = () => new Set(state.used[state.level] || []);
+      const topics = () => topicsOf(state);
+      const usedSet = () => usedOf(state);
       const unused = () => { const u = usedSet(); return topics().filter((t) => !u.has(t.id)); };
 
       // Fresh topics first; if fewer than a full wheel are left, pad it with ones already seen.
@@ -95,16 +95,13 @@
 
       function draw() {
         const left = unused().length, total = topics().length;
-        const cats = state.cats.length === 1 ? catLabel(state.cats[0]) : state.cats.length ? `${state.cats.length} категории` : "все темы";
         const head = `
           <div class="toolbar">
-            <span class="cuff-summary"><b>${state.level}</b> · ${esc(cats)}<br><span class="muted small">новых тем: ${left} из ${total}</span></span>
-            <button class="icon-btn" id="settings" title="Настройки" aria-label="Настройки" ${["wheel", "topic"].includes(phase) ? "" : "disabled"}>⚙️</button>
+            <span class="cuff-summary"><b>${state.level}</b> · ${esc(catsLabel(state))}<br><span class="muted small">новых тем: ${left} из ${total}</span></span>
+            ${["wheel", "topic"].includes(phase) ? `<a class="btn small" href="#settings?s=cuff">🎚️ Уровень и темы</a>` : ""}
           </div>`;
 
-        if (settings) {
-          root.innerHTML = `${head}${settingsPanel()}`;
-        } else if (phase === "wheel" || phase === "spinning" || phase === "topic") {
+        if (phase === "wheel" || phase === "spinning" || phase === "topic") {
           root.innerHTML = `${head}
             ${wheelSvg()}
             ${lapNote ? `<p class="note center">${esc(lapNote)}</p>` : ""}
@@ -147,67 +144,8 @@
         bind();
       }
 
-      function settingsPanel() {
-        const all = levelTopics();
-        const count = (c) => all.filter((t) => t.c === c).length;
-        const u = usedSet();
-        const fresh = topics().filter((t) => !u.has(t.id)).length;
-        return `<div class="card cuff-settings">
-          <h3>Уровень</h3>
-          <div class="seg" role="group" aria-label="Уровень">${LEVELS.map((l) => `<button data-level="${l}" class="${l === state.level ? "on" : ""}">${l}</button>`).join("")}</div>
-          <h3 class="section">Категории тем</h3>
-          <div class="row chips">
-            <button class="chip${state.cats.length ? "" : " on"}" data-cat="">Все темы · ${all.length}</button>
-            ${[...CATS].map(([id, c]) => `<button class="chip${state.cats.includes(id) ? " on" : ""}" data-cat="${id}">${c.icon} ${esc(c.name)} · ${count(id)}</button>`).join("")}
-          </div>
-          <p class="panel-count">В выборке <b>${topics().length}</b> тем, из них новых <b>${fresh}</b></p>
-          ${remindSection()}
-          <div class="row">
-            <button class="btn primary" id="settings-done">Готово</button>
-            <button class="btn" id="reset-used" ${u.size ? "" : "disabled"}>↺ Сбросить историю ${state.level}</button>
-          </div>
-        </div>`;
-      }
-
-      const remindSection = () => `<h3 class="section">🔔 Напоминание в Telegram</h3>${remind.html()}`;
-
-      function closeSettings() {
-        const changed = settings.before !== state.level + "|" + state.cats.join();
-        settings = null;
-        if (changed || phase !== "topic") { phase = "wheel"; topic = null; lapNote = ""; fillWheel(); }
-        draw();
-      }
-
       function bind() {
         const $ = (s) => root.querySelector(s);
-        if ($("#settings")) $("#settings").onclick = () => {
-          if (settings) return closeSettings();
-          settings = { before: state.level + "|" + state.cats.join() };
-          draw();
-          remind.load(() => { if (settings) draw(); });
-        };
-        root.querySelectorAll("[data-level]").forEach((b) => b.onclick = () => {
-          state.level = b.dataset.level;
-          save();
-          draw();
-        });
-        // "All" on → a tap picks just that category; otherwise taps toggle, and nothing left means all again.
-        root.querySelectorAll("[data-cat]").forEach((b) => b.onclick = () => {
-          const c = b.dataset.cat;
-          if (!c) state.cats = [];
-          else if (state.cats.includes(c)) state.cats = state.cats.filter((x) => x !== c);
-          else state.cats = [...state.cats, c];
-          save();
-          draw();
-        });
-        if ($("#settings-done")) $("#settings-done").onclick = closeSettings;
-        remind.bind(root, () => { if (settings) draw(); });
-        if ($("#reset-used")) $("#reset-used").onclick = async () => {
-          if (!(await App.confirm(`Снова считать новыми все темы уровня ${state.level}?`))) return;
-          state.used[state.level] = [];
-          save();
-          draw();
-        };
         if ($("#spin")) $("#spin").onclick = spin;
         if ($("#start")) $("#start").onclick = startRec;
         if ($("#stop")) $("#stop").onclick = stopRec;
@@ -355,4 +293,56 @@
       };
     },
   };
+
+  // ⚙️ Settings → 🎙️ Speak off the cuff: level, topic categories, topic history and the Telegram reminder.
+  App.settingsSection("cuff", 50, () => {
+    const remind = App.Reminder("cuff", { label: "Напоминать потренироваться", note: "Если в этот день ты уже отправил запись, бот не напомнит." });
+    let state = load();
+    const save = () => App.store.set("cuff", state);
+    return {
+      icon: "🎙️",
+      title: "Speak off the cuff",
+      sub: () => `${state.level} · ${catsLabel(state)}`,
+      html() {
+        state = load();
+        const all = window.CUFF_TOPICS[state.level];
+        const count = (c) => all.filter((t) => t.c === c).length;
+        const u = usedOf(state);
+        const fresh = topicsOf(state).filter((t) => !u.has(t.id)).length;
+        return `<div class="cuff-settings">
+          <h3>Уровень</h3>
+          <div class="seg" role="group" aria-label="Уровень">${LEVELS.map((l) => `<button data-level="${l}" class="${l === state.level ? "on" : ""}">${l}</button>`).join("")}</div>
+          <h3 class="section">Категории тем</h3>
+          <div class="row chips">
+            <button class="chip${state.cats.length ? "" : " on"}" data-cat="">Все темы · ${all.length}</button>
+            ${[...CATS].map(([id, c]) => `<button class="chip${state.cats.includes(id) ? " on" : ""}" data-cat="${id}">${c.icon} ${esc(c.name)} · ${count(id)}</button>`).join("")}
+          </div>
+          <p class="panel-count">В выборке <b>${topicsOf(state).length}</b> тем, из них новых <b>${fresh}</b></p>
+          <button class="btn small" id="reset-used" ${u.size ? "" : "disabled"}>↺ Сбросить историю ${state.level}</button>
+          <h3 class="section">🔔 Напоминание в Telegram</h3>${remind.html()}
+        </div>`;
+      },
+      bind(root, redraw) {
+        root.querySelectorAll("[data-level]").forEach((b) => b.onclick = () => { state.level = b.dataset.level; save(); redraw(); });
+        // "All" on → a tap picks just that category; otherwise taps toggle, and nothing left means all again.
+        root.querySelectorAll("[data-cat]").forEach((b) => b.onclick = () => {
+          const c = b.dataset.cat;
+          if (!c) state.cats = [];
+          else if (state.cats.includes(c)) state.cats = state.cats.filter((x) => x !== c);
+          else state.cats = [...state.cats, c];
+          save();
+          redraw();
+        });
+        const reset = root.querySelector("#reset-used");
+        if (reset) reset.onclick = async () => {
+          if (!(await App.confirm(`Снова считать новыми все темы уровня ${state.level}?`))) return;
+          state.used[state.level] = [];
+          save();
+          redraw();
+        };
+        remind.bind(root, redraw);
+      },
+      load: (redraw) => remind.load(redraw),
+    };
+  });
 })(window.App);

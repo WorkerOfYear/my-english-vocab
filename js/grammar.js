@@ -108,17 +108,16 @@
 
   App.pages.grammar = {
     // Screens: #grammar (list), #grammar?rule=ID[&tab=book], #grammar?practice=ID&mode=app|book, #grammar?review=1,
-    // #grammar?settings=1 (course book + reminder).
+    // (The reminder and the course book are in the common ⚙️ settings — section registered below.)
     title(p) {
       const r = byId(p.get("rule") || p.get("practice"));
       if (r) return `Грамматика · ${r.unit}`;
-      if (p.get("settings")) return "Грамматика · настройки";
       return p.get("review") ? "Грамматика · повторение" : "Грамматика";
     },
     // ← goes one level up: exercises → their rule → list of rules → home.
     parent(p) {
       if (p.get("practice") && byId(p.get("practice"))) return `grammar?rule=${p.get("practice")}${p.get("mode") === "book" ? "&tab=book" : ""}`;
-      if (p.get("rule") || p.get("review") || p.get("settings")) return "grammar";
+      if (p.get("rule") || p.get("review")) return "grammar";
       return "";
     },
     noFilter: true,
@@ -126,15 +125,12 @@
       let g = advance(load());
       let view = { name: "home" }; // home | rule {id, tab} | practice {mode, items, k, score, wrong, answered, from}
       const go = (hash) => { location.hash = hash; }; // the router re-renders the page for the new screen
-      const remind = App.Reminder("grammar", { label: "Напоминать о правиле недели", note: "Если правило недели уже разобрано на этой неделе, бот не напомнит." });
       let onKey = null;
-      let bookMsg = "";
 
       function draw() {
         if (onKey) { document.removeEventListener("keydown", onKey); onKey = null; }
         if (view.name === "rule") return drawRule();
         if (view.name === "practice") return drawPractice();
-        if (view.name === "settings") return drawSettings();
         drawHome();
       }
 
@@ -142,18 +138,6 @@
         const s = g.rules[r.id];
         if (!s || !s.learned) return "";
         return isDue(g, r) ? '<span class="badge">пора повторить</span>' : '<span class="badge added">✓ пройдено</span>';
-      }
-
-      function bookCard() {
-        const b = App.book;
-        return `<div class="card">
-          <h3>📕 Учебник</h3>
-          <p class="muted small">${b.loaded
-            ? `Загружены материалы учебника: ${b.count} юнитов. У каждого правила есть страница Grammar Bank и упражнения из Grammar Bank и Workbook.`
-            : "Можно добавить Grammar Bank и упражнения Workbook из своего учебника: загрузи файл <code>book.json</code>. Он хранится только у тебя — в браузере и в твоём хранилище на сервере, на сайт и в git не попадает."}</p>
-          <label class="btn small">📂 ${b.loaded ? "Обновить файл" : "Загрузить book.json"}<input type="file" id="book-file" accept=".json,application/json" hidden></label>
-          ${bookMsg ? `<p class="small">${esc(bookMsg)}</p>` : ""}
-        </div>`;
       }
 
       function drawHome() {
@@ -167,7 +151,7 @@
         root.innerHTML = `
           <div class="toolbar">
             <span class="muted small">Пройдено правил: ${learned.length} из ${all.length}${App.book.loaded ? " · 📕 учебник загружен" : ""}</span>
-            <button class="icon-btn" id="g-settings" title="Учебник и напоминание" aria-label="Настройки">⚙️</button>
+            <a class="btn small" href="#settings?s=grammar">🔔 Напоминание, учебник</a>
           </div>
           <div class="card accent">
             <div class="muted small">Правило недели · Unit ${esc(cur.unit)}</div>
@@ -196,29 +180,8 @@
           </div>`;
         bindCommon();
         root.querySelector("#review").onclick = () => go("grammar?review=1");
-        root.querySelector("#g-settings").onclick = () => go("grammar?settings=1");
         const next = root.querySelector("#next-now");
         if (next) next.onclick = () => { g.cur += 1; g.weekOf = mondayOf(App.today()); save(g); draw(); };
-      }
-
-      function drawSettings() {
-        root.innerHTML = `
-          <div class="card"><h3>🔔 Напоминание в Telegram</h3>${remind.html()}</div>
-          ${bookCard()}`;
-        remind.bind(root, () => { if (view.name === "settings") draw(); });
-        root.querySelector("#book-file").onchange = async (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          bookMsg = "⏳ Загружаю…";
-          draw();
-          try {
-            const n = await App.book.upload(file);
-            bookMsg = `✅ Загружено юнитов: ${n}.${App.sync && App.sync.connected ? " Файл сохранён и на сервере — на других устройствах он появится сам." : ""}`;
-          } catch (err) {
-            bookMsg = "⚠️ " + err.message;
-          }
-          draw();
-        };
       }
 
       function bindCommon() {
@@ -415,7 +378,7 @@
       if (ruleId && byId(ruleId)) view = { name: "rule", id: ruleId, tab: params.get("tab") === "book" ? "book" : "app" };
       if (practiceId && byId(practiceId)) start(params.get("mode") === "book" && bookTasks(byId(practiceId)).length ? "book" : "app", practiceId);
       else if (params.get("review") && rules().some((r) => g.rules[r.id]?.learned)) start("review");
-      else if (params.get("settings")) { view = { name: "settings" }; draw(); remind.load(() => { if (view.name === "settings") draw(); }); }
+      else if (params.get("settings")) { location.replace("#settings?s=grammar"); return; } // old link: settings moved
       else draw();
       return () => {
         if (onKey) document.removeEventListener("keydown", onKey);
@@ -424,6 +387,41 @@
       };
     },
   };
+
+  // ⚙️ Settings → 📘 Grammar: the weekly-rule reminder and the course book file.
+  App.settingsSection("grammar", 40, () => {
+    const remind = App.Reminder("grammar", { label: "Напоминать о правиле недели", note: "Если правило недели уже разобрано на этой неделе, бот не напомнит." });
+    let bookMsg = "";
+    return {
+      icon: "📘",
+      title: "Грамматика",
+      sub: () => (App.book.loaded ? "учебник загружен" : ""),
+      html: () => `<h3>🔔 Напоминание в Telegram</h3>${remind.html()}
+        <h3 class="section">📕 Учебник</h3>
+        <p class="muted small">${App.book.loaded
+          ? `Загружены материалы учебника: ${App.book.count} юнитов. У каждого правила есть страница Grammar Bank и упражнения из Grammar Bank и Workbook.`
+          : "Можно добавить Grammar Bank и упражнения Workbook из своего учебника: загрузи файл <code>book.json</code>. Он хранится только у тебя — в браузере и в твоём хранилище на сервере, на сайт и в git не попадает."}</p>
+        <label class="btn small">📂 ${App.book.loaded ? "Обновить файл" : "Загрузить book.json"}<input type="file" id="book-file" accept=".json,application/json" hidden></label>
+        ${bookMsg ? `<p class="small">${esc(bookMsg)}</p>` : ""}`,
+      bind(root, redraw) {
+        remind.bind(root, redraw);
+        root.querySelector("#book-file").onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          bookMsg = "⏳ Загружаю…";
+          redraw();
+          try {
+            const n = await App.book.upload(file);
+            bookMsg = `✅ Загружено юнитов: ${n}.${App.sync && App.sync.connected ? " Файл сохранён и на сервере — на других устройствах он появится сам." : ""}`;
+          } catch (err) {
+            bookMsg = "⚠️ " + err.message;
+          }
+          redraw();
+        };
+      },
+      load: (redraw) => remind.load(redraw),
+    };
+  });
 
   App.grammarCheck = isRight; // for tests
 })(window.App);

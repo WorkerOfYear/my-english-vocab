@@ -477,3 +477,16 @@ details.bulk[open] > summary { margin-bottom: 8px; }
 .weeks .wk { flex: 1; height: 100%; display: flex; align-items: flex-end; }
 .weeks .bar { width: 100%; background: var(--accent); opacity: .55; border-radius: 3px 3px 0 0; min-height: 2px; }
 .weeks .now .bar { opacity: 1; }
+
+/* ⚙️ settings: collapsible sections */
+.settings-section { padding: 0; }
+.settings-section > summary {
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; user-select: none;
+}
+.settings-section > summary::-webkit-details-marker { display: none; }
+.settings-section > summary b { flex: 1 1 auto; }
+.settings-section > summary::after { content: "›"; font-size: 1.4rem; line-height: 1; color: var(--muted); transition: transform .15s; }
+.settings-section[open] > summary::after { transform: rotate(90deg); }
+.settings-section .sec-icon { font-size: 1.2rem; width: 1.6rem; text-align: center; flex: none; }
+.settings-section .sec-sub { text-align: right; max-width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.settings-section .sec-body { padding: 0 16px 16px; border-top: 1px solid var(--border); padding-top: 12px; }

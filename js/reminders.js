@@ -47,7 +47,7 @@
     return {
       html() {
         if (!App.sync || !App.sync.connected) {
-          return `<p class="muted small">Напоминания работают на сайте после входа в аккаунт: подключи бота в ⚙️ настройках.</p>`;
+          return `<p class="muted small">Напоминания работают на сайте после входа в аккаунт и подключения бота (⚙️ настройки → 🤖 Telegram).</p>`;
         }
         const r = st.data;
         if (!r) return `<p class="muted small">${st.msg ? esc(st.msg) : "⏳ Загружаю…"}</p>`;

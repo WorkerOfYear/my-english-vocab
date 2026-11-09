@@ -99,7 +99,7 @@
 
           <div class="legend">${STEP_LABELS.map((l, s) => `<span class="pill s${s}">${l}</span>`).join("")}</div>
 
-          <p class="muted small center">Резервная копия, синхронизация и напоминания — в <a href="#settings">⚙️ настройках</a>.</p>`;
+          <p class="muted small center">Автодобавление, напоминания и резервная копия — в <a href="#settings?s=tracker">⚙️ настройках</a>.</p>`;
 
         root.querySelector("#batch").onchange = (e) => { srs.setSettings({ batchSize: +e.target.value }); draw(); };
         root.querySelector("#order").onchange = (e) => { srs.setSettings({ order: e.target.value }); draw(); };
